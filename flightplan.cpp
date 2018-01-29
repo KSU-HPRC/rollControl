@@ -39,6 +39,46 @@ int getNumberFromChars(char* c, int n)
     return result;
 }
 
+// Utility Functions for Config Parsing
+
+bool isFpVital(char e){
+    if (isDigit(e)) return true;
+    if (e == '.') return true;
+    if(e == '+') return true;
+    if (e == '-') return true;
+    if (e == '~') return true;
+    if (e == '#') return true;
+    return false;
+}
+
+int getCaSize(char* str){
+    int i = 0;
+    while(str[i] != '\0'){ ++i; }
+    ++i;
+    return i;
+}
+
+char* caAppend(char* in, char e){
+    /*Appends to a char* allocated on the heap*/
+    if (in == nullptr){
+        in = new char[2];
+        in[0] = e;
+        in[1] = '\0';
+        return in;
+    }
+    else{
+        int size = getCaSize(in);
+        char* temp = new char[size+2];
+        int i = 0;
+        for(; i < size-1; ++i){ temp[i] = in[i]; }
+        delete[] in;
+        in = temp;
+        in[i] = e;
+        in[i+1] = '\0';
+        return in;
+    }
+}
+
 
 ///flightplan Implementation
 

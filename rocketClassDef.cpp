@@ -1,7 +1,4 @@
-
 #include "rocketClass.hpp"
-#include <MatrixMath.h>
-#include <math.h>
 
 rocket::rocket(){
 	// Orientation Data
@@ -23,6 +20,8 @@ rocket::rocket(){
 	pitchUp2Date = false;
 	Adafruit_BMP280 bmp;
 	Adafruit_BNO055 orient = Adafruit_BNO055(55);
+    model.omega = 0;
+    model.moi = 0;
 }
 
 double rocket::getSpeed(){
@@ -60,8 +59,10 @@ double rocket::getRoll(){
     if(!rollUp2Date){
         //float tempMatrix[9]={0};
         float rocketNorth[3]={0};
+        Matrix.Print((float*)rocketNorth,3,1,"n");
         //for(int i=0;i<9;++i) tempMatrix[i]=R[i]; //Need to copy the temp matrix
         Matrix.Multiply((float *)R,(float *)north,3,3,1,(float*)rocketNorth);
+        Matrix.Print((float*)rocketNorth,3,1,"n");
         
         roll= atan(rocketNorth[0]/rocketNorth[1]);
     }
@@ -83,4 +84,66 @@ int rocket::updateRotMatrix(){
 
 double rocket::getRollRate(){
 	//Should be nearly identical to get roll, except using vQ instead of Q. 
+}
+
+int rocket::parseConfig(char* fname, int numOfParams){
+    File file = SD.open(fname);
+    if (file){
+        int property = 0;
+        if (property > numOfParams) return -1;
+        char* str = NULL;
+        while (file.available()){
+            char ch = file.read();
+            if (ch == '\n' && property < numOfParams){ /*Then we know we have a full number value*/
+                double val = catod(str);
+                switch (property){  /*Add new cases depending on how many properties are in the config file*/
+                    case 0: model.omega = val; break;
+                    case 1: model.moi = val; break;
+                    default: return -2;
+                }
+                delete[] str;
+                str = NULL;
+                ++property;
+            }
+            else if (ch == '\n'){  /*Iterated over all the properties except flight plan, property == numOfParams*/
+                /*get flight plan*/
+                // model.plan = flightPlan(str);
+            }
+            else if (isFpVital(ch)) { str = caAppend(str, ch); } 
+        }
+    }
+    else return -3;
+    return 0;
+}
+
+/*Converting a char aray to double (Found this online, dont know how well it works)*/
+double catod(char* num){
+    if (!num || !*num) return 0;
+    double rhs = 0;
+    double lhs = 0;
+    int divisor = 1;
+    int sign = 1;
+    bool inFraction = false;
+    if (*num == '-'){ ++num; sign = -1; }
+    else if (*num == '+'){ ++num; }
+    while (*num != '\0'){
+        if (isDigit(*num)){
+            if (inFraction){
+                lhs = lhs*10 + (*num - '0');
+                divisor *= 10;
+            }
+            else 
+                rhs = rhs*10 + (*num - '0');
+        }
+        else if (*num == '.'){
+            if (inFraction)
+                return sign * (rhs + lhs/divisor);
+            else 
+                inFraction = true;
+        }
+        else 
+            return sign * (rhs + lhs/divisor);
+        ++num;
+    }
+    return sign * (rhs + lhs/divisor);
 }
