@@ -1,5 +1,8 @@
-/*#include <cassert>
-#include "..\flightplan.hpp"
+#define TESTING true
+#if TESTING
+
+#include <cassert>
+#include "flightplan.hpp"
 #include <iostream>
 
 int main()
@@ -108,6 +111,129 @@ int main()
         std::cerr << "Done" << std::endl;
     }
 
+    {
+        std::cerr << "Flight- plan hold position: \n";
+        char testPlan[] = "#1;+0001000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // Rotation test.
+        fp.beginRotation(0);
+        assert(fp.getTargetAngle(0) == 0);
+        assert(fp.getTargetAngle(500) == 0);
+        assert(fp.getTargetAngle(1000) == 0);
+
+        std::cerr << "Done" << std::endl;
+    }
+
+    {
+        std::cerr << "Flight- rotate 90: \n";
+        char testPlan[] = "#1;+0901000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // Rotation test.
+        fp.beginRotation(0);
+        assert(fp.getTargetAngle(0) == 0);
+        assert(fp.getTargetAngle(500) == 45);
+        assert(fp.getTargetAngle(1000) == 90);
+
+        std::cerr << "Done" << std::endl;
+    }
+
+    {
+        std::cerr << "Flight- keeps state: \n";
+        char testPlan[] = "#2;+0901000;+1801000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // First command.
+        fp.beginRotation(0);
+        assert(fp.getTargetAngle(0) == 0);
+        assert(fp.getTargetAngle(500) == 45);
+        assert(fp.getTargetAngle(1000) == 90);
+
+        // Second command.
+        assert(fp.getTargetAngle(1500) == 135);
+        assert(fp.getTargetAngle(2000) == 180);
+
+        std::cerr << "Done" << std::endl;
+    }
+
+    {
+        std::cerr << "Flight- Rolls ccw: \n";
+        char testPlan[] = "#2;+0901000;-0001000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // First command.
+        fp.beginRotation(0);
+        assert(fp.getTargetAngle(0) == 0);
+        assert(fp.getTargetAngle(500) == 45);
+        assert(fp.getTargetAngle(1000) == 90);
+
+        // Second command.
+        assert(fp.getTargetAngle(1500) == 45);
+        assert(fp.getTargetAngle(2000) == 0);
+
+        std::cerr << "Done" << std::endl;
+    }
+
+    {
+        std::cerr << "Flight- Rolls shortest: \n";
+        char testPlan[] = "#2;~0901000;+1801000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // First command.
+        fp.beginRotation(0);
+        assert(fp.getTargetAngle(0) == 90);
+        assert(fp.getTargetAngle(500) == 90);
+        assert(fp.getTargetAngle(1000) == 90);
+
+        // Second command.
+        assert(fp.getTargetAngle(1500) == 135);
+        assert(fp.getTargetAngle(2000) == 180);
+
+        std::cerr << "Done" << std::endl;
+    }
+
+    {
+        std::cerr << "Flight- Loop test: \n";
+        char testPlan[] = "#2;~0901000;+1801000;";
+        flightplan fp;
+
+        // Parse phase.
+        fp.parseFlightPlan(testPlan);
+        assert(fp.validFlightPlan());
+
+        // First command.
+        fp.beginRotation(0);
+        int angle = 0;
+        for (unsigned long l = 0; l < 2500; l += 10)
+        {
+            angle = fp.getTargetAngle(l);
+            std::cerr << angle << std::endl;
+            assert((angle >= 0) && (angle < 360));
+        }
+    }
+
     return 0;
 }
-*/
+
+#endif
