@@ -57,6 +57,7 @@ void setup() {
     }
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
+    hprcRock.createRefrence(orient, bmp);
 }
 
 void loop() {

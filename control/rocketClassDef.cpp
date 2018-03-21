@@ -45,8 +45,8 @@ float rocket::getSpeedSq(){
 }
 
 int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
-    long current=millis();
-    if(current-lastUpdate>10){
+    long current=micros();
+    if(current-lastUpdate>10000){
         deltaT=float(current-lastUpdate)/1000000.0;
         lastUpdate=current;
 
@@ -54,7 +54,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
         a = Q.rotateVector(bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL)); 
         
         T=baro.readTemperature();
-        P=baro.readPressure()
+        P=baro.readPressure();
 
         pitchUp2Date = false;
         rollUp2Date = false;
@@ -91,7 +91,7 @@ float rocket::getRoll(){
             axis.normalize();
 
             imu::Quaternion toVertical;
-            toVertical.fromAngleAxis(axis,angle);
+            toVertical.fromAngleAxis(axis,angle); //Rotates 
             ref=toVertical.rotateVector(Q.rotateVector(rollRef));
         } else { //Rocket pointing bellow the horizon
             Vector<3> axis=up.cross(Q.rotateVector(pointing));
