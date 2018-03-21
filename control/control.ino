@@ -7,10 +7,9 @@
 //Global variables;
 
 int flightMode;
-
+rocket hprcRock;
 Adafruit_BMP280 bmp;
 Adafruit_BNO055 orient = Adafruit_BNO055(55);
-rocket hprcRock(orient,bmp);
 Servo ailerons;
 bool wireFlag = false;
 
