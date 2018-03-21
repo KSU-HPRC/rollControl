@@ -26,6 +26,28 @@ void toChar(float in, unsigned char * c) {
     c[3] = converter.b[3];
 }
 
+void toChar(unsigned long in, unsigned char * c) {
+    charFloatConverter converter;
+	converter.l = in;
+
+	c[0] = converter.b[0];
+    c[1] = converter.b[1];
+    c[2] = converter.b[2];
+    c[3] = converter.b[3];
+}
+
+void toChar(imu::vector v, unsigned char * c){
+    toChar(v[0],c);
+    toChar(v[1],c+4);
+    toChar(v[2],c+8);
+}
+void toChar(imu::quaternion q, unsigned char * c){
+    toChar(q.x(),c);
+    toChar(q.y(),c+4);
+    toChar(q.z(),c+8);
+    toChar(q.w(),c+12);
+}
+
 bool isDigit(char c)
 {
     return '0' <= c && c <= '9';
@@ -149,27 +171,6 @@ float catof(char* num){
         ++num;
     }
     return sign * (rhs + lhs);
-}
-
-void cross(float* a,float* b,float* c){
-    c[0]=a[1]*b[2]-a[2]*b[1];
-    c[1]=a[2]*b[0]-a[0]*b[2];
-    c[2]=a[0]*b[1]-a[1]*b[0];
-}
-
-float vecMag(float *v,char len){
-    return sqrt(dotProd(v,v));
-}
-
-void normalize(float* a,float*b){
-    float vecAMag=vecMag(a,3);
-    b[0]=a[0]/vecAMag;
-    b[1]=a[1]/vecAMag;
-    b[2]=a[2]/vecAMag;
-}
-
-float dotProd(float* a,float* b){
-    return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 }
 
 #endif

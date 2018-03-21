@@ -15,24 +15,24 @@
 #define fpacc 5
 #define numBytes 64
 
-#define PI 2*asin(1)
 
 class rocket {
 public:
     rocket();
     ~rocket(){};
     int fillModel(int, int);
+    int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&); //Calculates the refrence frame vectors
+
+    //Inflight sensor update and logging
     int updateSensorData(Adafruit_BNO055&, Adafruit_BMP280&);
     int logData(char*, int);
-    int updateRotMatrix();
 
+    //In flight info extraction
     float getSpeed();
     float getSpeedSq();
     float getRoll();
     float getRollRate();
     float getPitch();
-    float getz() {return z;};
-    float* getQ() {return (float*)Q;};
 
     float getDampingConstant() { return 1.0; }
     float getSpringConstant() { return 1.0; }
@@ -43,27 +43,29 @@ public:
     const flightplan& getPlan(){ return plan;}
 private:
     // Orientation Data
-    float Q[4] {0,0,0,0};
+    imu::Quaternion Q;
 
     float pitch;
     float roll;
     float rollRate;
 
     long lastUpdate;
-    int deltaT;
+    float deltaT;
 
-    float R[9]{0,0,0,
-               0,0,0,
-               0,0,0};     // rotation matrix, stored beause it's frequently used.
-    float up[3]{0,0,1};    // points "up" in the ground frame.    Placeholder is 0,0,1.  Must be a unit vector
-    float north[3]{1,0,0}; // points "north" in the ground plane. Placeholder is 1,0,0 or 0,1,0
+    //Ground frame basis vectors:
+    imu::Vector<3> up;
+    imu::Vector<3> north;
+    imu::Vector<3> east;
+
+    //Rocked basis vectors
+    imu::Vector<3> pointing; //Something like (0,0,1)
+    imu::Vector<3> rollRef;  //Something like (1,0,0)
 
     // Location Data and Trajectory
     // All values should be in ground frame.
 
-    float v[3]{0,0,0};
-    float a[3]{0,0,0};
-    float aNRocketFrame[3]{0,0,0};
+    imu::Vector<3>v;
+    imu::Vector<3>a;
 
     //atomospheric data
     float P;

@@ -1,15 +1,21 @@
 #ifndef UTILLITY_HPP
 #define UTILLITY_HPP
+#include "vector.h"
+#include "quaternion.h"
 
 union charFloatConverter{
     unsigned char b[4];
     float f;
+    unsigned long l;
 };
 
 
 //Float-byte converters for coms-control communication
 float toFloat(unsigned char *);
-void toChar(float, unsigned char *); 
+void toChar(float, unsigned char *);
+void toChar(imu::vector, unsigned char *);
+void toChar(imu::quaternion, unsigned char *);
+void toChar(unsigned long, unsigned char *);
 
 //FlightPlan utility
 bool isDigit(char);
