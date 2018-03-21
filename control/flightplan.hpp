@@ -18,10 +18,10 @@ struct flightCommand
     int rollTime;                 // Time to get to new heading, in milliseconds
 };
 
-/// if (validFlightPlan) Ensures:
-///     - size() > 0
-///     - 0 <= op[] < size() returns valid flightCommand
-///     - 0 <= flightCommand.heading < 360
+// if (validFlightPlan) Ensures:
+//     - size() > 0
+//     - 0 <= op[] < size() returns valid flightCommand
+//     - 0 <= flightCommand.heading < 360
 class flightplan
 {
 public:
@@ -48,8 +48,8 @@ public:
         return valid;
     }
 
-    /// Parse a flight plan string format:
-    /// '#3;+0901000;-0001000;~1802000;\0'
+    // Parse a flight plan string format:
+    // '#3;+0901000;-0001000;~1802000;\0'
     void parseFlightPlan(char*);
     void beginRotation(unsigned long);
     int getTargetAngle(unsigned long);

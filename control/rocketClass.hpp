@@ -10,7 +10,7 @@
 #include "flightplan.hpp"
 #include "utility.hpp"
 
-#define numOfCParams 3
+#define numOfCParams 4
 #define commsDevice 19
 #define fpacc 5
 #define numBytes 64
@@ -24,8 +24,8 @@ public:
     int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&); //Calculates the refrence frame vectors
 
     //Inflight sensor update and logging
-    int updateSensorData(Adafruit_BNO055&, Adafruit_BMP280&);
-    int logData(char*, int);
+    int updateSensorData();
+    int sendDataComms(int);
 
     //In flight info extraction
     float getSpeed();
@@ -40,7 +40,7 @@ public:
     float getInherientTorque() { return 0.0; } //TODO: impliment
     int finAngle(float f) { return static_cast<int>(f); }
 
-    const flightplan& getPlan(){ return plan;}
+    //const flightplan& getPlan(){ return plan;}
 private:
     // Orientation Data
     imu::Quaternion Q;
@@ -77,6 +77,7 @@ private:
     bool speedUp2Date;
 
     float omega;
+    float calibrationPressure;
     float moi;
     flightplan plan;
 };

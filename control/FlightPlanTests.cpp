@@ -1,5 +1,8 @@
+/*#define TESTING true
+=======
 /*
 #define TESTING true
+>>>>>>> fed98dfd1dc3743187b16841bef74c9e73bbadf1
 #if TESTING
 
 #include <cassert>
@@ -237,5 +240,5 @@ int main()
     return 0;
 }
 
-#endif
-*/
+<<<<<<< HEAD
+#endif*/

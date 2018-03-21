@@ -3,6 +3,8 @@
 #include "vector.h"
 #include "quaternion.h"
 
+#include"math.h"
+
 union charFloatConverter{
     unsigned char b[4];
     float f;
@@ -28,12 +30,13 @@ int getCaSize(char*);
 char* caAppend(char*, char);
 int pftoi(float&);
 
-
+void toHex(unsigned char*, unsigned char*, char);
 //vector math calculations
 void cross(float*,float*,float*);
 float vecMag(float *,char);
 void normalize(float*,float*);
 float dotProd(float*,float*);
+
 //RocketClass utility
 
 float catof(char*);

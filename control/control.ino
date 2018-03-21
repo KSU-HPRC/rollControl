@@ -11,6 +11,7 @@ rocket hprcRock;
 Adafruit_BMP280 bmp;
 Adafruit_BNO055 orient = Adafruit_BNO055(55);
 Servo ailerons;
+bool nfpValid;
 bool wireFlag = false;
 
 //Control algorithm functions
@@ -18,19 +19,17 @@ bool wireFlag = false;
 float goalTorque(rocket &);
 float deltaTorque(rocket&,float);
 
-
 void setup() {
-    //serialDump();
+    serialDump();
+    Wire.onRequest(requestHandler);
+    Wire.onReceive(receiveHandler);
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
     ailerons.attach(servoPin);
-    Serial.begin(9600);
+    Serial.begin(57600);
     Wire.begin(75);
 
     Serial.print(F("Initializing SD Card..."));
-    //Wire.requestFrom(commsDevice, 1);
-    //Serial.print(F("Foo"));
-    
     resetDev(commsRst);
     delay(1500);
     Wire.requestFrom(commsDevice,1);
@@ -66,16 +65,15 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
+    hprcRock.sendDataComms(commsDevice);
     //Send Sensor Data for logging
-//    hprcRock.logData();
     switch (flightMode){
-        case 0 : 
-            //On the ground
+        case 0 :
             break;
         case 1:
             //boost phase
             break;
-        case 2: 
+        case 2:
             //No control cost.  May be skipped, depending on what the competion rules are
             break;
         case 3:
@@ -94,6 +92,21 @@ void loop() {
     }
 }
 
+void receiveHandler(int bytesReceived){
+    switch(flightMode){
+        case 0: newFlightPlan();
+    }
+}
+
+void requestHandler(){
+    switch(flightMode){
+        case 0: {
+            if (nfpValid) sendAck();
+            else sendErr();
+        }
+    }
+}
+
 void serialDump(){
     while (Serial.available()){
         char d = Serial.read();
@@ -105,6 +118,24 @@ void resetDev(int pin){
     delay(25);
     digitalWrite(pin, HIGH);
 }
+
+void newFlightPlan(){
+    char* potfp = nullptr;
+    for (int i = 0; Wire.available(); ++i){
+        potfp = caAppend(potfp, Wire.read());
+    }
+    Serial.println(F("GOT NEW FP!"));
+    flightplan nfp;
+    nfp.parseFlightPlan(potfp);
+    if (nfp.validFlightPlan()){
+        hprcRock.getPlan() = nfp;
+        nfpValid = true;
+    }
+    else nfpValid = false;
+}
+
+void sendAck(){ Wire.write('0'); }
+void sendErr(){ Wire.write('1'); }
 
 float goalTorque(rocket & BFR){
     float targetRoll=BFR.getPlan().getTargetAngle(millis())*(PI/180.0);

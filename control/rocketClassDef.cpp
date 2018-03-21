@@ -17,7 +17,6 @@ rocket::rocket(){
     pointing=imu::Vector<3>(0,0,1);
     rollRef=imu::Vector<3>(1,0,0);
 
-
     omega = 0;
     moi = 0;
 }
@@ -49,7 +48,6 @@ float rocket::getSpeedSq(){
         v[1]+=(1000000.0/((float)deltaT))*a[1];
         v[2]+=(1000000.0/((float)deltaT))*a[2];   
     }
-
     updateRotMatrix()
     float rocketUp[3]={0};
     Matrix.Multiply((float *)R,(float *)up,3,3,1,(float*)rocketUp)
@@ -126,7 +124,7 @@ float rocket::getRoll(){
 
 float rocket::getRollRate(){
     getRoll();
-	return rollRate;
+    return rollRate;
 }
 
 int rocket::fillModel(int fpsize, int devName){
@@ -142,17 +140,60 @@ int rocket::fillModel(int fpsize, int devName){
         switch (property){
             case 0: omega = catof(str); break;
             case 1: moi = catof(str); break;
-            case 2: plan.parseFlightPlan(str); break;
+            case 2: calibrationPressure = catof(str); break;
+            case 3: plan.parseFlightPlan(str); break;
         }
         {
-          delete[] str;
-          str = nullptr;
+            delete[] str;
+            str = nullptr;
         }
         ++property;
     }
     return 0;
 }
 
-int rocket::logData(char* fname, int floatSize){
-    
+int rocket::sendDataComms(int device){
+    unsigned char* msg = new unsigned char[packetSize];
+    unsigned char i = 0;
+    // quaternion (16 bytes)
+    for (; i < 4; ++i){
+        toChar(Q[i], msg+(i*4));
+    }
+    // micros (timestamp) (4 bytes)
+    unsigned long micro = micros();
+    toChar(micro, msg+(i*4));
+    ++i;
+    // Altitude !!!TO BE REPLACED WITH PRESSURE!!!(4) bytes
+    toChar(z, msg+(i*4));
+    ++i;
+    // Vector a(12 bytes)
+    unsigned char it = 0;
+    while (it < 3){
+        toChar(A[it], msg+(i*4));
+        ++it; ++i;
+    }
+
+    // temp (4 bytes)
+    toChar();
+    ++i;
+    // flight event (1 byte)
+    msg[++i] = '1';
+
+    //Serial.println("SENDING");
+    Wire.beginTransmission(device);
+    unsigned char* out = new unsigned char[(packetSize*2) + 1];
+    toHex(msg, out, packetSize);
+    char j = 0;
+    while (j < packetSize){
+        //Serial.print(out[j*2]);
+        //Serial.print(out[(j*2)+1]);
+        Wire.write(msg[j]);
+        ++j;
+    }
+
+    Wire.endTransmission();
+    delete[] out;
+    out = nullptr;
+    delete[] msg;
+    msg = nullptr;
 }
