@@ -31,7 +31,7 @@ int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
     north=m-(up*m.dot(up));
     north.normalize(); //Just in case.
     east=north.cross(up);
-    east.normalize; //Just in case.
+    east.normalize(); //Just in case.
 }
 
 float rocket::getSpeed(){
@@ -78,7 +78,7 @@ float rocket::getRoll(){
     if(!rollUp2Date){
         float oldRoll=roll;
         Vector<3> ref;
-        getPitch()
+        getPitch();
 
 
         if(pitch>PI/2.0-0.01 /*Rocket pointing straight up*/){
@@ -91,7 +91,7 @@ float rocket::getRoll(){
             axis.normalize();
 
             imu::Quaternion toVertical;
-            toVertical.fromAngleAxis(axis,angle); //Rotates 
+            toVertical.fromAxisAngle(axis,angle); //Rotates 
             ref=toVertical.rotateVector(Q.rotateVector(rollRef));
         } else { //Rocket pointing bellow the horizon
             Vector<3> axis=up.cross(Q.rotateVector(pointing));
@@ -99,7 +99,7 @@ float rocket::getRoll(){
             axis.normalize();
 
             imu::Quaternion toVertical;
-            toVertical.fromAngleAxis(axis,angle);
+            toVertical.fromAxisAngle(axis,angle);
 
             ref=(toVertical.rotateVector(Q.rotateVector(rollRef)))*-1;
         }
@@ -154,34 +154,21 @@ int rocket::fillModel(int fpsize, int devName){
 int rocket::sendDataComms(int device){
     unsigned char* msg = new unsigned char[packetSize];
     unsigned char i = 0;
-    // quaternion (16 bytes)
-    for (; i < 4; ++i){
-        toChar(Q[i], msg+(i*4));
-    }
-    // micros (timestamp) (4 bytes)
-    unsigned long micro = micros();
-    toChar(micro, msg+(i*4));
+    toChar(Q, msg);
+    i += 4;
+    toChar(a, msg+(i*4));
+    i += 3;
+    toChar(P, msg+(i*4));
     ++i;
-    // Altitude !!!TO BE REPLACED WITH PRESSURE!!!(4) bytes
-    toChar(z, msg+(i*4));
+    toChar(T, msg+(i*4));
     ++i;
-    // Vector a(12 bytes)
-    unsigned char it = 0;
-    while (it < 3){
-        toChar(A[it], msg+(i*4));
-        ++it; ++i;
-    }
-
-    // temp (4 bytes)
-    toChar();
-    ++i;
-    // flight event (1 byte)
+    toChar(lastUpdate, msg+(i*4));
     msg[++i] = '1';
 
     //Serial.println("SENDING");
     Wire.beginTransmission(device);
-    unsigned char* out = new unsigned char[(packetSize*2) + 1];
-    toHex(msg, out, packetSize);
+    //unsigned char* out = new unsigned char[(packetSize*2) + 1];
+    //toHex(msg, out, packetSize);
     char j = 0;
     while (j < packetSize){
         //Serial.print(out[j*2]);
@@ -191,8 +178,8 @@ int rocket::sendDataComms(int device){
     }
 
     Wire.endTransmission();
-    delete[] out;
-    out = nullptr;
+    //delete[] out;
+    //out = nullptr;
     delete[] msg;
     msg = nullptr;
 }

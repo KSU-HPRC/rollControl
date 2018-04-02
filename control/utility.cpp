@@ -39,26 +39,16 @@ void toChar(unsigned long in, unsigned char * c) {
     c[3] = converter.b[3];
 }
 
-void toChar(unsigned long in, unsigned char * c) {
-    charFloatConverter converter;
-	converter.l = in;
-
-	c[0] = converter.b[0];
-    c[1] = converter.b[1];
-    c[2] = converter.b[2];
-    c[3] = converter.b[3];
+void toChar(imu::Vector<3> v, unsigned char * c){
+    toChar((float)v[0],c);
+    toChar((float)v[1],c+4);
+    toChar((float)v[2],c+8);
 }
-
-void toChar(imu::vector v, unsigned char * c){
-    toChar(v[0],c);
-    toChar(v[1],c+4);
-    toChar(v[2],c+8);
-}
-void toChar(imu::quaternion q, unsigned char * c){
-    toChar(q.x(),c);
-    toChar(q.y(),c+4);
-    toChar(q.z(),c+8);
-    toChar(q.w(),c+12);
+void toChar(imu::Quaternion q, unsigned char * c){
+    toChar((float)q.x(),c);
+    toChar((float)q.y(),c+4);
+    toChar((float)q.z(),c+8);
+    toChar((float)q.w(),c+12);
 }
 
 bool isDigit(char c)

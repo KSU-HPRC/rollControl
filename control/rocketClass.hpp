@@ -14,6 +14,7 @@
 #define commsDevice 19
 #define fpacc 5
 #define numBytes 64
+#define packetSize 22
 
 
 class rocket {
@@ -24,7 +25,7 @@ public:
     int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&); //Calculates the refrence frame vectors
 
     //Inflight sensor update and logging
-    int updateSensorData();
+    int updateSensorData(Adafruit_BNO055 &, Adafruit_BMP280 &);
     int sendDataComms(int);
 
     //In flight info extraction
@@ -40,7 +41,7 @@ public:
     float getInherientTorque() { return 0.0; } //TODO: impliment
     int finAngle(float f) { return static_cast<int>(f); }
 
-    //const flightplan& getPlan(){ return plan;}
+    flightplan& getPlan(){ return plan;}
 private:
     // Orientation Data
     imu::Quaternion Q;
@@ -49,7 +50,7 @@ private:
     float roll;
     float rollRate;
 
-    long lastUpdate;
+    unsigned long lastUpdate;
     float deltaT;
 
     //Ground frame basis vectors:
