@@ -1,5 +1,6 @@
 #ifndef UTILLITY_HPP
 #define UTILLITY_HPP
+#include <Adafruit_BNO055.h>
 
 #include"math.h"
 
@@ -13,6 +14,8 @@ union charFloatConverter{
 //Float-byte converters for coms-control communication
 float toFloat(unsigned char *);
 void toChar(float, unsigned char *);
+void toChar(imu::Vector<3>, unsigned char *);
+void toChar(imu::Quaternion, unsigned char *);
 void toChar(unsigned long, unsigned char *);
 
 //FlightPlan utility

@@ -7,10 +7,9 @@
 //Global variables;
 
 int flightMode;
-
+rocket hprcRock;
 Adafruit_BMP280 bmp;
 Adafruit_BNO055 orient = Adafruit_BNO055(55);
-rocket hprcRock(orient,bmp);
 Servo ailerons;
 bool nfpValid;
 bool wireFlag = false;
@@ -58,6 +57,7 @@ void setup() {
     }
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
+    hprcRock.createRefrence(orient, bmp);
 }
 
 void loop() {

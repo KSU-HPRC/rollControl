@@ -39,6 +39,18 @@ void toChar(unsigned long in, unsigned char * c) {
     c[3] = converter.b[3];
 }
 
+void toChar(imu::Vector<3> v, unsigned char * c){
+    toChar((float)v[0],c);
+    toChar((float)v[1],c+4);
+    toChar((float)v[2],c+8);
+}
+void toChar(imu::Quaternion q, unsigned char * c){
+    toChar((float)q.x(),c);
+    toChar((float)q.y(),c+4);
+    toChar((float)q.z(),c+8);
+    toChar((float)q.w(),c+12);
+}
+
 bool isDigit(char c)
 {
     return '0' <= c && c <= '9';
@@ -162,36 +174,6 @@ float catof(char* num){
         ++num;
     }
     return sign * (rhs + lhs);
-}
-
-void cross(float* a,float* b,float* c){
-    c[0]=a[1]*b[2]-a[2]*b[1];
-    c[1]=a[2]*b[0]-a[0]*b[2];
-    c[2]=a[0]*b[1]-a[1]*b[0];
-}
-
-float vecMag(float *v,char len){
-    return sqrt(dotProd(v,v));
-}
-
-void normalize(float* a,float*b){
-    float vecAMag=vecMag(a,3);
-    b[0]=a[0]/vecAMag;
-    b[1]=a[1]/vecAMag;
-    b[2]=a[2]/vecAMag;
-}
-
-void toHex(unsigned char* in, unsigned char* out, char len){
-    char i = 0;
-    for (; i < len; ++i){
-        out[2*i] = hex[(in[i]/16)];
-        out[(2*i)+1] = hex[(in[i]%16)];
-    }
-    out[2*i] = '\0';
-}
-
-float dotProd(float* a,float* b){
-    return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 }
 
 #endif
