@@ -34,6 +34,7 @@ public:
     float getRoll();
     float getRollRate();
     float getPitch();
+    float getA_pointing();
 
     float getDampingConstant() { return 1.0; }
     float getSpringConstant() { return 1.0; }

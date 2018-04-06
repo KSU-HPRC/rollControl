@@ -57,7 +57,7 @@ void setup() {
     }
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
-    hprcRock.createRefrence(orient, bmp);
+    hprcRock.createRefrence(orient, bmp,commsDevice);
 }
 
 void loop() {
@@ -70,16 +70,20 @@ void loop() {
     //Send Sensor Data for logging
     switch (flightMode){
         case 0 :
+            //prelaunch
+            if(hprcRock.getA_pointing()>1) flightMode++;
             break;
         case 1:
             //boost phase
+            if(hprcRock.getA_pointing()<10) flightMode+=2;
             break;
         case 2:
             //No control cost.  May be skipped, depending on what the competion rules are
             break;
         case 3:
             //Coast phase, where we control roll
-            ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
+            ailerons.write(5)
+            //ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
             break;
         case 4:
             //Decent phase, initial
