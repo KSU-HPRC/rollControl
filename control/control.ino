@@ -3,6 +3,7 @@
 #define commsRst 6
 #define controlRst 7
 #define servoPin 8
+#define servoZero 10
 
 //Global variables;
 
@@ -13,6 +14,7 @@ Adafruit_BNO055 orient = Adafruit_BNO055(55);
 Servo ailerons;
 bool nfpValid;
 bool wireFlag = false;
+unsigned long lastEventTime=0;
 
 //Control algorithm functions
 
@@ -26,9 +28,10 @@ void setup() {
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
     ailerons.attach(servoPin);
+    ailerons.write(servoZero); 
     Serial.begin(57600);
     Wire.begin(75);
-
+    
     Serial.print(F("Initializing SD Card..."));
     resetDev(commsRst);
     delay(1500);
@@ -71,7 +74,7 @@ void loop() {
     switch (flightMode){
         case 0 :
             //prelaunch
-            if(hprcRock.getA_pointing()>1) flightMode++;
+            if(hprcRock.getA_pointing()>20) flightMode++;
             break;
         case 1:
             //boost phase
@@ -82,7 +85,7 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-            ailerons.write(5)
+            ailerons.write(servoZero+5);
             //ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
             break;
         case 4:

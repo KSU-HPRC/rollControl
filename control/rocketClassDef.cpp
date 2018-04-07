@@ -133,7 +133,7 @@ float rocket::getRollRate(){
 }
 
 float rocket::getA_pointing(){
-    return a.dot(pointing);
+    return sqrt(a.dot(a));
 }
 
 int rocket::fillModel(int fpsize, int devName){
@@ -161,13 +161,13 @@ int rocket::fillModel(int fpsize, int devName){
     return 0;
 }
 
-int rocket::sendRefComs(int device,const imu::Vector<3> g,imu::Vector<3> m){
+int rocket::sendRefComs(int device,const imu::Vector<3> & g,imu::Vector<3> & m){
     unsigned char* msg = new unsigned char[packetSize];
     unsigned char i = 0;
     toChar(g,msg);
-    i+=3
+    i+=3;
     toChar(m,msg+(i*4));
-    msg[40]=unsigned char(2);
+    msg[40]=2;
 
     Wire.beginTransmission(device);
 
@@ -182,6 +182,7 @@ int rocket::sendRefComs(int device,const imu::Vector<3> g,imu::Vector<3> m){
     //out = nullptr;
     delete[] msg;
     msg = nullptr;
+    return 0;
 }
 
 int rocket::sendDataComms(int device){
@@ -196,7 +197,7 @@ int rocket::sendDataComms(int device){
     toChar(T, msg+(i*4));
     ++i;
     toChar(lastUpdate, msg+(i*4));
-    msg[4*(++i)] = unsigned char(1);
+    msg[4*(++i)] = 1;
 
     //Serial.println("SENDING");
     Wire.beginTransmission(device);
