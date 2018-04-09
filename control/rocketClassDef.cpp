@@ -21,12 +21,18 @@ rocket::rocket(){
     moi = 0;
 }
 
-int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
+int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int device){
     Vector<3> g=bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
+    Vector<3> m=bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+    //Save the refrence data;
+    sendRefComs(device,g,m);
+
+    //Get the up vector
     g.normalize();
     up=g*-1;
 
-    Vector<3> m=bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+    //Get north and east vectors    
     m.normalize();
     north=m-(up*m.dot(up));
     north.normalize(); //Just in case.
@@ -126,6 +132,10 @@ float rocket::getRollRate(){
     return rollRate;
 }
 
+float rocket::getA_pointing(){
+    return sqrt(a.dot(a));
+}
+
 int rocket::fillModel(int fpsize, int devName){
     int property = 0;
     while (property < numOfCParams){
@@ -151,6 +161,30 @@ int rocket::fillModel(int fpsize, int devName){
     return 0;
 }
 
+int rocket::sendRefComs(int device,const imu::Vector<3> & g,imu::Vector<3> & m){
+    unsigned char* msg = new unsigned char[packetSize];
+    unsigned char i = 0;
+    toChar(g,msg);
+    i+=3;
+    toChar(m,msg+(i*4));
+    msg[40]=2;
+
+    Wire.beginTransmission(device);
+
+    char j = 0;
+    while (j < packetSize){
+        Wire.write(msg[j]);
+        ++j;
+    }
+
+    Wire.endTransmission();
+    //delete[] out;
+    //out = nullptr;
+    delete[] msg;
+    msg = nullptr;
+    return 0;
+}
+
 int rocket::sendDataComms(int device){
     unsigned char* msg = new unsigned char[packetSize];
     unsigned char i = 0;
@@ -163,7 +197,7 @@ int rocket::sendDataComms(int device){
     toChar(T, msg+(i*4));
     ++i;
     toChar(lastUpdate, msg+(i*4));
-    msg[++i] = '1';
+    msg[4*(++i)] = 1;
 
     //Serial.println("SENDING");
     Wire.beginTransmission(device);

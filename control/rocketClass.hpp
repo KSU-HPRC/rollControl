@@ -22,11 +22,12 @@ public:
     rocket();
     ~rocket(){};
     int fillModel(int, int);
-    int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&); //Calculates the refrence frame vectors
+    int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&,int); //Calculates the refrence frame vectors
 
     //Inflight sensor update and logging
     int updateSensorData(Adafruit_BNO055 &, Adafruit_BMP280 &);
     int sendDataComms(int);
+    int sendRefComs(int,const imu::Vector<3> &,imu::Vector<3> &);
 
     //In flight info extraction
     float getSpeed();
@@ -34,6 +35,7 @@ public:
     float getRoll();
     float getRollRate();
     float getPitch();
+    float getA_pointing();
 
     float getDampingConstant() { return 1.0; }
     float getSpringConstant() { return 1.0; }
