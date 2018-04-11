@@ -14,8 +14,8 @@ rocket::rocket(){
     rollMatrixUp2Date = false;
     speedUp2Date = false;
 
-    pointing=imu::Vector<3>(0,0,1);
-    rollRef=imu::Vector<3>(1,0,0);
+    pointing=imu::Vector<3>(1,0,0);
+    rollRef=imu::Vector<3>(0,0,1);
 
     omega = 0;
     moi = 0;
@@ -133,7 +133,7 @@ float rocket::getRollRate(){
 }
 
 float rocket::getA_pointing(){
-    return sqrt(a.dot(a));
+    return a.dot(pointing);
 }
 
 int rocket::fillModel(int fpsize, int devName){
