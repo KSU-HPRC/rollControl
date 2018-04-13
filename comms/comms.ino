@@ -35,7 +35,7 @@ void setup(){
 }
 
 void loop(){
-    Serial.println("LOOPING");
+    //Serial.println("LOOPING");
     while (keepListening){
         char inc = Serial.read();
         delay(1);
@@ -135,12 +135,13 @@ void logSD(unsigned char* str, int len){
     logger.close();
 }
 
-void transmitXbee(unsigned char* str, int len){
+void transmitXbee(char* str, int len){
     char i = 0;
     while (i < len){
         Serial.print(str[i]);
         ++i;
     }
+    Serial.println();
 }
 
 void serialDump(){
