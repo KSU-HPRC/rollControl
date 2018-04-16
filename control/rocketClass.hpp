@@ -36,12 +36,18 @@ public:
     float getRollRate();
     float getPitch();
     float getA_pointing();
+    float getDynamicPressure();
 
-    float getDampingConstant() { return 1.0; }
-    float getSpringConstant() { return 1.0; }
+    float getDampingConstant() { return dampingConst; }
+    float getSpringConstant()  { return springConst; }
+    float getRollResistance()  { return rollResist; }
+    float getSystemStrength()  { return systemStrength; }
 
-    float getInherientTorque() { return 0.0; } //TODO: impliment
-    int finAngle(float f) { return static_cast<int>(f); }
+    float goalTorque();
+    float inherientTorque();
+    float deltaTorque(){return goalTorque()-inherientTorque();};
+
+    int finAngle();
 
     flightplan& getPlan(){ return plan;}
 private:
@@ -78,6 +84,12 @@ private:
     bool pitchUp2Date;
     bool rollMatrixUp2Date;
     bool speedUp2Date;
+
+    float rollResist;
+    float systemStrength;
+
+    float springConst;
+    float dampingConst;
 
     float omega;
     float calibrationPressure;

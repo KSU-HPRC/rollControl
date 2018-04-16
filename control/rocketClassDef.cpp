@@ -1,5 +1,7 @@
 #include "rocketClass.hpp"
 
+#define mOverR (0.02897/8.3144598)
+
 using imu::Vector;
 
 
@@ -14,8 +16,8 @@ rocket::rocket(){
     rollMatrixUp2Date = false;
     speedUp2Date = false;
 
-    pointing=imu::Vector<3>(0,0,1);
-    rollRef=imu::Vector<3>(1,0,0);
+    pointing=imu::Vector<3>(1,0,0);
+    rollRef=imu::Vector<3>(0,0,1);
 
     omega = 0;
     moi = 0;
@@ -30,7 +32,7 @@ int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int devic
 
     //Get the up vector
     g.normalize();
-    up=g*-1;
+    up=g*(-1);
 
     //Get north and east vectors    
     m.normalize();
@@ -57,7 +59,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
         lastUpdate=current;
 
         Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
-        a = Q.rotateVector(bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL)); 
+        a = Q.rotateVector(bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL)); // convert a into the orignal frame
         
         T=baro.readTemperature();
         P=baro.readPressure();
@@ -133,7 +135,11 @@ float rocket::getRollRate(){
 }
 
 float rocket::getA_pointing(){
-    return sqrt(a.dot(a));
+    return a.dot(pointing);
+}
+
+float rocket::getDynamicPressure(){
+    return ((P/T)*mOverR)*getSpeedSq()/2;
 }
 
 int rocket::fillModel(int fpsize, int devName){
@@ -216,4 +222,16 @@ int rocket::sendDataComms(int device){
     //out = nullptr;
     delete[] msg;
     msg = nullptr;
+}
+
+float rocket::goalTorque(){
+
+}
+
+float rocket::inherientTorque(){
+    return -1*getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
+}
+
+int rocket::finAngle(){
+    
 }
