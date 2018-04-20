@@ -12,5 +12,8 @@ Roll control and data logging for KSU HPRC (2017-2018)
 
  [Servo](https://www.arduino.cc/en/Reference/Servo)
 
+##Required tweak to core libraries:
+ 
+Wire.h _must_ be modified such that BUFFER_LENGTH is 48 (not 32)
 
  

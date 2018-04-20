@@ -7,6 +7,16 @@
 char hex[16] = {'0','1','2','3','4','5','6','7','8','9',
                 'A','B','C','D','E','F'};
 
+void printVec(imu::Vector<3> v){
+    Serial.print('(');
+    Serial.print(v.x());
+    Serial.print(',');
+    Serial.print(v.y());
+    Serial.print(',');
+    Serial.print(v.z());
+    Serial.println(')');
+}
+
 float toFloat(unsigned char * c){
 
     charFloatConverter converter;
