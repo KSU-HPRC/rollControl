@@ -5,6 +5,10 @@
 #define servoPin 8
 #define servoZero 10
 
+#define red 15
+#define green 16
+#define blue 17
+
 //Global variables;
 
 int flightMode;
@@ -26,12 +30,18 @@ void setup() {
     Wire.onRequest(requestHandler);
     Wire.onReceive(receiveHandler);
     pinMode(commsRst, OUTPUT);
-    pinMode(commsRst, HIGH);
+    pinMode(red, OUTPUT);
+    pinMode(green, OUTPUT);
+    pinMode(blue, OUTPUT);
+    digitalWrite(commsRst, HIGH);
+    delay(100);
+    digitalWrite(commsRst, LOW);
+    delay(100);
     ailerons.attach(servoPin);
-    ailerons.write(servoZero); 
+    ailerons.write(servoZero);
     Serial.begin(57600);
     Wire.begin(75);
-    
+
     Serial.print(F("Initializing SD Card..."));
     resetDev(commsRst);
     delay(1500);
@@ -98,8 +108,10 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-            ailerons.write(servoZero+5);
-            //ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
+            //ailerons.write(servoZero+5);
+	        int finAngle = hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock)));
+            ailerons.write(finAngle);
+            powerLED(finAngle);
             break;
         case 4:
             //Decent phase, initial
@@ -157,3 +169,21 @@ void newFlightPlan(){
 
 void sendAck(){ Wire.write('0'); }
 void sendErr(){ Wire.write('1'); }
+
+void powerLED(int finAngle){
+    if (finAngle > 0){
+        red.digitalWrite(0xff);
+        green.digitalWrite(0x00);
+        blue.digitalWrite(0x00);
+    }
+    else if (finAngle == 0){
+        red.digitalWrite(0x00);
+        green.digitalWrite(0xff);
+        blue.digitalWrite(0x00);
+    }
+    else {
+        red.digitalWrite(0x00);
+        green.digitalWrite(0x00);
+        blue.digitalWrite(0xff);
+    }
+}
