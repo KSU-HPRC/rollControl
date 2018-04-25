@@ -69,19 +69,32 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
+
+    Serial.println(hprcRock.getPitch());
+    Serial.println(hprcRock.getRoll());
+
     hprcRock.sendDataComms(commsDevice);
     //Send Sensor Data for logging
     switch (flightMode){
         case 0 :
             //prelaunch
-            if(hprcRock.getA_pointing()>20) flightMode++;
+            if(hprcRock.getA_pointing()>20) {
+              flightMode++;
+              lastEventTime=millis();
+            }
             break;
         case 1:
             //boost phase
-            if(hprcRock.getA_pointing()<10) flightMode+=2;
+            if(hprcRock.getA_pointing()<10){
+              flightMode++;
+              lastEventTime=millis();
+            }
             break;
         case 2:
-            //No control cost.  May be skipped, depending on what the competion rules are
+            if(millis()-lastEventTime>=250){
+              flightMode++;
+              lastEventTime=millis();
+            }
             break;
         case 3:
             //Coast phase, where we control roll
@@ -144,12 +157,3 @@ void newFlightPlan(){
 
 void sendAck(){ Wire.write('0'); }
 void sendErr(){ Wire.write('1'); }
-
-float goalTorque(rocket & BFR){
-    float targetRoll=BFR.getPlan().getTargetAngle(millis())*(PI/180.0);
-    return -1*BFR.getDampingConstant()*BFR.getRollRate()-BFR.getSpringConstant()*(BFR.getRoll()-targetRoll);
-}
-
-float deltaTorque(rocket& BFR,float goal){
-    return BFR.getInherientTorque()-goal;
-}
