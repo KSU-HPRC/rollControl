@@ -26,6 +26,7 @@ float goalTorque(rocket &);
 float deltaTorque(rocket&,float);
 
 void setup() {
+    delay(1000); // Necessary for syncronization of boards
     serialDump();
     Wire.onRequest(requestHandler);
     Wire.onReceive(receiveHandler);
@@ -169,6 +170,7 @@ void newFlightPlan(){
 
 void sendAck(){ Wire.write('0'); }
 void sendErr(){ Wire.write('1'); }
+<<<<<<< HEAD
 
 void powerLED(int finAngle){
     if (finAngle > 0){
@@ -187,3 +189,5 @@ void powerLED(int finAngle){
         blue.digitalWrite(0xff);
     }
 }
+=======
+>>>>>>> 8923bc51007800d3297a035d33442c8304d0c41d
