@@ -10,6 +10,9 @@ union charFloatConverter{
     unsigned long l;
 };
 
+//Print functions
+void printVec(imu::Vector<3>);
+
 
 //Float-byte converters for coms-control communication
 float toFloat(unsigned char *);

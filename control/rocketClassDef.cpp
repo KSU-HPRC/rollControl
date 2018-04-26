@@ -19,13 +19,19 @@ rocket::rocket(){
     pointing=imu::Vector<3>(1,0,0);
     rollRef=imu::Vector<3>(0,0,1);
 
-    omega = 0;
-    moi = 0;
+    //systemStrength=0.00201527;
+    systemStrength=100;
+    rollResist=systemStrength*0.065;
+
+    //springConst = 0.00806818;
+    springConst =1;
+    dampingConst; 0.01613636;
 }
 
 int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int device){
     Vector<3> g=bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
     Vector<3> m=bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
 
     //Save the refrence data;
     sendRefComs(device,g,m);
@@ -45,7 +51,8 @@ int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int devic
 float rocket::getSpeed(){
     v=v+(a*deltaT);
 
-    return v.dot(Q.rotateVector(pointing));
+    //return v.dot(Q.rotateVector(pointing));
+    return 223;
 }
 float rocket::getSpeedSq(){
     float vMag=getSpeed();
@@ -90,10 +97,13 @@ float rocket::getRoll(){
 
 
         if(pitch>PI/2.0-0.01 /*Rocket pointing straight up*/){
+            //Serial.println(F("straight up"));
             ref=Q.rotateVector(rollRef);
-        } else if(pitch<0.01-PI/2 /*Rocket pointing straight down*/) { 
+        } else if(pitch<0.01-PI/2 /*Rocket pointing straight down*/) {
+            //Serial.println(F("straight down"));
             ref=(Q.rotateVector(rollRef))*-1;
         } else if(pitch>0 /*Rocket pointing above the horizon*/){
+            //Serial.println(F("up"));
             Vector<3> axis=up.cross(Q.rotateVector(pointing));
             float angle=asin(axis.magnitude());
             axis.normalize();
@@ -102,6 +112,7 @@ float rocket::getRoll(){
             toVertical.fromAxisAngle(axis,angle); //Rotates 
             ref=toVertical.rotateVector(Q.rotateVector(rollRef));
         } else { //Rocket pointing bellow the horizon
+            //Serial.println(F("down"));
             Vector<3> axis=up.cross(Q.rotateVector(pointing));
             float angle=asin(axis.magnitude());
             axis.normalize();
@@ -111,12 +122,13 @@ float rocket::getRoll(){
 
             ref=(toVertical.rotateVector(Q.rotateVector(rollRef)))*-1;
         }
-
-       if(east.dot(ref)>0){
-           roll=acos(north.dot(ref));
-       } else {
-           roll=acos(2*PI+north.dot(ref));
-       }
+        if(east.dot(ref)>0){
+            //Serial.println(F("case E"));
+            roll=acos(north.dot(ref));
+        } else {
+            //Serial.println(F("case W"));
+            roll=PI+acos(north.dot(ref));
+        }
 
         //Calculate roll rate:
         if(oldRoll > 7.0/4.0*PI && roll < 1.0/4.0*PI){ //Roll has likely passed from near all the way around the way around the circle through zero.
@@ -142,7 +154,7 @@ float rocket::getDynamicPressure(){
     return ((P/T)*mOverR)*getSpeedSq()/2;
 }
 
-int rocket::fillModel(int fpsize, int devName){
+int rocket::fillModel(int fpsize, int devName){/*
     int property = 0;
     while (property < numOfCParams){
         char* str = nullptr;
@@ -163,7 +175,7 @@ int rocket::fillModel(int fpsize, int devName){
             str = nullptr;
         }
         ++property;
-    }
+    }*/
     return 0;
 }
 
@@ -192,25 +204,25 @@ int rocket::sendRefComs(int device,const imu::Vector<3> & g,imu::Vector<3> & m){
 }
 
 int rocket::sendDataComms(int device){
-    unsigned char* msg = new unsigned char[packetSize];
+    unsigned char* msg = new unsigned char[/*packetSize*/32];
     unsigned char i = 0;
     toChar(Q, msg);
     i += 4;
     toChar(a, msg+(i*4));
     i += 3;
-    toChar(P, msg+(i*4));
+    /*toChar(P, msg+(i*4));
     ++i;
     toChar(T, msg+(i*4));
-    ++i;
+    ++i;*/
     toChar(lastUpdate, msg+(i*4));
-    msg[4*(++i)] = 1;
+    //msg[4*(++i)] = 1;
 
     //Serial.println("SENDING");
     Wire.beginTransmission(device);
     //unsigned char* out = new unsigned char[(packetSize*2) + 1];
     //toHex(msg, out, packetSize);
     char j = 0;
-    while (j < packetSize){
+    while (j < /*packetSize*/ 32){
         //Serial.print(out[j*2]);
         //Serial.print(out[(j*2)+1]);
         Wire.write(msg[j]);
@@ -225,13 +237,22 @@ int rocket::sendDataComms(int device){
 }
 
 float rocket::goalTorque(){
-
+    //return -getSpringConstant()*(plan.getTargetAngle(lastUpdate/1000)-getRoll())-getDampingConstant()*getRollRate();
+    float result=-getSpringConstant()*(0-getRoll())-getDampingConstant()*getRollRate();
+    //Serial.println(F("hi"));
+    //Serial.println(result);
+    return result;
 }
 
 float rocket::inherientTorque(){
-    return -1*getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
+    return -getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
 }
 
 int rocket::finAngle(){
-    
+    //Serial.println(getDynamicPressure());
+    //Serial.println(goalTorque());
+    int raw=2*goalTorque();
+    if(raw>15) return 15;
+    if(raw<-15) return -15;
+    return raw;
 }
