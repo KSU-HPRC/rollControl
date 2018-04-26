@@ -22,6 +22,7 @@ float goalTorque(rocket &);
 float deltaTorque(rocket&,float);
 
 void setup() {
+    delay(1000); // Necessary for syncronization of boards
     serialDump();
     Wire.onRequest(requestHandler);
     Wire.onReceive(receiveHandler);
