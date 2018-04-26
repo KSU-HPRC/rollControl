@@ -1,6 +1,9 @@
 #include "rocketClass.hpp"
 
 #define mOverR (0.02897/8.3144598)
+#define maxQ = ((293.15*101300.0*mOverR)*122500.0/2)
+
+#define omega_0 4.0
 
 using imu::Vector;
 
@@ -151,7 +154,7 @@ float rocket::getA_pointing(){
 }
 
 float rocket::getDynamicPressure(){
-    return ((P/T)*mOverR)*getSpeedSq()/2;
+    return ((P/(T+273.15))*mOverR)*getSpeedSq()/2;
 }
 
 int rocket::fillModel(int fpsize, int devName){/*
@@ -251,7 +254,9 @@ float rocket::inherientTorque(){
 int rocket::finAngle(){
     //Serial.println(getDynamicPressure());
     //Serial.println(goalTorque());
-    int raw=2*goalTorque();
+    float k=(5/45)*maxQ/getDynamicPressure();
+    float c=4.0*k/(omega_0*omega_0);
+    int raw = (180.0/PI)*(k*(getRoll()-plan.getTargetAngle(millis()))+c*getRollRate());
     if(raw>15) return 15;
     if(raw<-15) return -15;
     return raw;
