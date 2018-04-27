@@ -61,22 +61,29 @@ void setup() {
     }
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
+
+    delay(3000);
     hprcRock.createRefrence(orient, bmp,commsDevice);
 }
 
 void loop() {
-    Serial.println(F("IN LOOP"));
+    //Serial.println(F("IN LOOP"));
     //any code that needs to run every loop regardless of flightMode.
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
-
-    Serial.println(hprcRock.getPitch());
-    Serial.println(hprcRock.getRoll());
-
+    /*
+    Serial.print(F("Pitch: "));
+    Serial.println(hprcRock.getPitch()*180.0/PI);
+    Serial.print(F("Roll: "));
+    Serial.println(hprcRock.getRoll()*180.0/PI);
+    */
+    
     hprcRock.sendDataComms(commsDevice);
+    //Serial.println(hprcRock.getA_pointing());
     //Send Sensor Data for logging
     switch (flightMode){
+        
         case 0 :
             //prelaunch
             if(hprcRock.getA_pointing()>20) {
@@ -99,11 +106,23 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
+<<<<<<< HEAD
             //ailerons.write(servoZero+5);
             ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
+=======
+            ailerons.write(servoZero+5);
+            //Serial.print(F("Fin a"));
+            //Serial.println(hprcRock.finAngle());
+            //ailerons.write(servoZero+hprcRock.finAngle());
+            if(millis()-lastEventTime>=3000){
+              flightMode++;
+              lastEventTime=millis();
+            }
+>>>>>>> f1fba19952a03e3a411ed244dda8bc5dfa2d7a1f
             break;
         case 4:
             //Decent phase, initial
+            ailerons.write(servoZero);
             break;
         case 5:
             //Decent phase, after main chute deply
@@ -112,6 +131,8 @@ void loop() {
             //on ground
             break;
     }
+    //For debug
+    //delay(1000);
 }
 
 void receiveHandler(int bytesReceived){
