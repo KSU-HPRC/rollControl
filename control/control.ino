@@ -99,8 +99,8 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-            ailerons.write(servoZero+5);
-            //ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
+            //ailerons.write(servoZero+5);
+            ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
             break;
         case 4:
             //Decent phase, initial
