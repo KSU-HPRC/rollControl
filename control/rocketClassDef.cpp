@@ -256,7 +256,9 @@ int rocket::finAngle(){
     //Serial.println(goalTorque());
     float k=(5/45)*maxQ/getDynamicPressure();
     float c=4.0*k/(omega_0*omega_0);
-    int raw = (180.0/PI)*(k*(getRoll()-plan.getTargetAngle(millis()))+c*getRollRate());
+    float deltaTheta=getRoll()-plan.getTargetAngle(millis())*(PI/180.0);
+    if(deltaTheta>180) deltaTheta-=360.0;
+    int raw = (180.0/PI)*(k*deltaTheta+c*getRollRate());
     if(raw>15) return 15;
     if(raw<-15) return -15;
     return raw;
