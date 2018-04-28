@@ -5,7 +5,7 @@
 #define servoPin 8
 #define servoZero 20
 #define launchPin 14
-
+#define ledPin 15
 
 //Global variables;
 
@@ -34,6 +34,7 @@ void setup() {
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
     pinMode(launchPin, INPUT);
+    pinMode(ledPin, OUTPUT);
     ailerons.attach(servoPin);
     ailerons.write(servoZero); 
     Serial.begin(57600);
@@ -70,6 +71,7 @@ void setup() {
 
     delay(3000);
     hprcRock.createRefrence(orient, bmp,commsDevice);
+    digitalWrite(ledPin, HIGH);
 }
 
 void loop() {
@@ -96,6 +98,7 @@ void loop() {
             if (launchConnection == LOW)
             {
                 Serial.print("Launched");
+                digitalWrite(ledPin, LOW);
                 flightMode++;
             }
             break;
@@ -104,6 +107,8 @@ void loop() {
             flightMode++;
             // Pause until after burnout.
             delay(3000);
+            // Turn the LED back on when the system comes back on.
+            digitalWrite(ledPin, HIGH);
             break;
         case 2:
             flightMode++;
