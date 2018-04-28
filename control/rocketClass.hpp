@@ -60,6 +60,8 @@ private:
     float roll;
     float rollRate;
 
+    sensors_event_t sensorData;
+
     unsigned long lastUpdate;
     float deltaT;
 

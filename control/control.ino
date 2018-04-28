@@ -3,7 +3,9 @@
 #define commsRst 6
 #define controlRst 7
 #define servoPin 8
-#define servoZero 10
+#define servoZero 20
+#define launchPin 14
+
 
 //Global variables;
 
@@ -15,6 +17,9 @@ Servo ailerons;
 bool nfpValid;
 bool wireFlag = false;
 unsigned long lastEventTime=0;
+
+float finAngle = 0;
+int launchConnection = HIGH;
 
 //Control algorithm functions
 
@@ -28,6 +33,7 @@ void setup() {
     Wire.onReceive(receiveHandler);
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
+    pinMode(launchPin, INPUT);
     ailerons.attach(servoPin);
     ailerons.write(servoZero); 
     Serial.begin(57600);
@@ -72,6 +78,7 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
+    
     /*
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
@@ -85,35 +92,35 @@ void loop() {
     switch (flightMode){
         
         case 0 :
-            //prelaunch
-            if(hprcRock.getA_pointing()>20) {
-              flightMode++;
-              lastEventTime=millis();
+            launchConnection = digitalRead(launchPin);
+            if (launchConnection == LOW)
+            {
+                Serial.print("Launched");
+                flightMode++;
             }
             break;
         case 1:
             //boost phase
-            if(hprcRock.getA_pointing()<10){
-              flightMode++;
-              lastEventTime=millis();
-            }
+            flightMode++;
+            // Pause until after burnout.
+            delay(3000);
             break;
         case 2:
-            if(millis()-lastEventTime>=250){
-              flightMode++;
-              lastEventTime=millis();
-            }
+            flightMode++;
             break;
         case 3:
             //Coast phase, where we control roll
             ailerons.write(servoZero+5);
             //Serial.print(F("Fin a"));
             //Serial.println(hprcRock.finAngle());
-            //ailerons.write(servoZero+hprcRock.finAngle());
-            if(millis()-lastEventTime>=3000){
-              flightMode++;
-              lastEventTime=millis();
-            }
+            finAngle = hprcRock.finAngle();
+            Serial.print("\t\t\t\t\t\tFin Angle: ");
+            Serial.println(finAngle);
+            ailerons.write(servoZero + finAngle);
+            //if(millis()-lastEventTime>=3000){
+            //  flightMode++;
+            //  lastEventTime=millis();
+            //}
             break;
         case 4:
             //Decent phase, initial
