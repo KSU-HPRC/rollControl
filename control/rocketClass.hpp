@@ -75,7 +75,7 @@ private:
     // Location Data and Trajectory
     // All values should be in ground frame.
 
-    imu::Vector<3>v;
+    float v;
     imu::Vector<3>a;
 
     //atomospheric data
