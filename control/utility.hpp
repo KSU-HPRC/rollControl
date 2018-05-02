@@ -8,6 +8,7 @@ union charFloatConverter{
     unsigned char b[4];
     float f;
     unsigned long l;
+    int i;
 };
 
 //Print functions
@@ -17,6 +18,8 @@ void printVec(imu::Vector<3>);
 //Float-byte converters for coms-control communication
 float toFloat(unsigned char *);
 void toChar(float, unsigned char *);
+void toCharViaInt(float, unsigned char *);
+void toCharViaInt(imu::Vector<3>,unsigned char *);
 void toChar(imu::Vector<3>, unsigned char *);
 void toChar(imu::Quaternion, unsigned char *);
 void toChar(unsigned long, unsigned char *);
