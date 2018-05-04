@@ -52,6 +52,8 @@ public:
     int finAngle();
 
     flightplan& getPlan(){ return plan;}
+
+    void beginMoves(unsigned long mils) { plan.beginRotation(mils); }
 private:
     // Orientation Data
     imu::Quaternion Q;

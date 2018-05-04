@@ -1,4 +1,5 @@
 #include "rocketClass.hpp"
+#include "bangbang.hpp"
 
 #define mOverR (0.02897/8.3144598)
 #define maxQ ((293.15*101300.0*mOverR)*122500.0/2)
@@ -29,6 +30,9 @@ rocket::rocket(){
     //springConst = 0.00806818;
     springConst =1;
     dampingConst; 0.01613636;
+
+    char testPlan[] = "#2;~0901000;+2701000;";
+    plan.parseFlightPlan(testPlan);
 }
 
 int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int device){
@@ -68,11 +72,6 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
         deltaT=float(current-lastUpdate)/1000000.0;
         lastUpdate=current;
 
-        //Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
-        //a = Q.rotateVector(bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL)); // convert a into the orignal frame
-        
-        //T=baro.readTemperature();
-        //P=baro.readPressure();
         bno.getEvent(&sensorData);
 
         pitchUp2Date = false;
@@ -87,7 +86,6 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
 
 float rocket::getPitch(){
     if (!pitchUp2Date){
-        //pitch=asin(up.dot(Q.rotateVector(pointing)));
         pitch = sensorData.orientation.y;
         Serial.print("Pitch: ");
         Serial.println(pitch);
@@ -98,54 +96,9 @@ float rocket::getPitch(){
 
 float rocket::getRoll(){
     if(!rollUp2Date){
-//        float oldRoll=roll;
-//        Vector<3> ref;
-//        getPitch();
-//
-//
-//        if(pitch>PI/2.0-0.01 /*Rocket pointing straight up*/){
-//            //Serial.println(F("straight up"));
-//            ref=Q.rotateVector(rollRef);
-//        } else if(pitch<0.01-PI/2 /*Rocket pointing straight down*/) {
-//            //Serial.println(F("straight down"));
-//            ref=(Q.rotateVector(rollRef))*-1;
-//        } else if(pitch>0 /*Rocket pointing above the horizon*/){
-//            //Serial.println(F("up"));
-//            Vector<3> axis=up.cross(Q.rotateVector(pointing));
-//            float angle=asin(axis.magnitude());
-//            axis.normalize();
-//
-//            imu::Quaternion toVertical;
-//            toVertical.fromAxisAngle(axis,angle); //Rotates 
-//            ref=toVertical.rotateVector(Q.rotateVector(rollRef));
-//        } else { //Rocket pointing bellow the horizon
-//            //Serial.println(F("down"));
-//            Vector<3> axis=up.cross(Q.rotateVector(pointing));
-//            float angle=asin(axis.magnitude());
-//            axis.normalize();
-//
-//            imu::Quaternion toVertical;
-//            toVertical.fromAxisAngle(axis,angle);
-//
-//            ref=(toVertical.rotateVector(Q.rotateVector(rollRef)))*-1;
-//        }
-//        if(east.dot(ref)>0){
-//            //Serial.println(F("case E"));
-//            roll=acos(north.dot(ref));
-//        } else {
-//            //Serial.println(F("case W"));
-//            roll=PI+acos(north.dot(ref));
-//        }
-//
-//        //Calculate roll rate:
-//        if(oldRoll > 7.0/4.0*PI && roll < 1.0/4.0*PI){ //Roll has likely passed from near all the way around the way around the circle through zero.
-//            rollRate=(roll-oldRoll+2.0*PI)/deltaT;
-//        } else if(roll > 7.0/4.0*PI && oldRoll < 1.0/4.0*PI){ //Roll has likely passed from barely around the circle through zero
-//            rollRate=(roll-oldRoll-2.0*PI)/deltaT;
-//        } else rollRate=(roll-oldRoll)/deltaT; //Roll has not passed through zero.
           roll = sensorData.orientation.x;
-          Serial.print("\t\t\tRoll: ");
-          Serial.println(roll);
+          //Serial.print("\t\t\tRoll: ");
+          //Serial.println(roll);
     }
     rollUp2Date = true;
     return roll;
@@ -258,36 +211,9 @@ float rocket::inherientTorque(){
     return -getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
 }
 
-#define targetAngle 180
-#define tolerance 5
-#define deflectAngle 20
 int rocket::finAngle(){
-//    //Serial.println(getDynamicPressure());
-//    //Serial.println(goalTorque());
-//    float k=(5/45)*maxQ/getDynamicPressure();
-//    float c=4.0*k/(omega_0*omega_0);
-//    float deltaTheta=getRoll()-plan.getTargetAngle(millis())*(PI/180.0);
-//    if(deltaTheta>180) deltaTheta-=360.0;
-//    int raw = (180.0/PI)*(k*deltaTheta+c*getRollRate());
-//
-//    if(raw>15) return 15;
-//    if(raw<-15) return -15;
-//    return raw;
-
-    int offAngle = int(getRoll() - targetAngle);
-    
-    Serial.println(offAngle);
-    if (offAngle > tolerance) 
-    {
-        return deflectAngle;
-    } 
-    else if ( offAngle < -tolerance) 
-    {
-        // Need to turn left.
-        return -deflectAngle;
-    } 
-    else 
-    {
-        return 0;
-    }
+    int target = plan.getTargetAngle(millis());
+    Serial.print("Fin angle:");
+    Serial.println(target);
+    return getFinAngle(target, getRoll());
 }
