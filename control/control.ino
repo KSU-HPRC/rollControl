@@ -22,6 +22,7 @@ float goalTorque(rocket &);
 float deltaTorque(rocket&,float);
 
 void setup() {
+    delay(1000); // Necessary for syncronization of boards
     serialDump();
     Wire.onRequest(requestHandler);
     Wire.onReceive(receiveHandler);
@@ -76,6 +77,7 @@ void loop() {
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
+    Serial.print(F("Fin Angle: "));
     Serial.println(hprcRock.finAngle());
     
     
@@ -106,7 +108,9 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-            ailerons.write(servoZero+5);
+            //ailerons.write(servoZero+5);
+            ailerons.write(hprcRock.finAngle());
+            //ailerons.write(servoZero+5);
             //Serial.print(F("Fin a"));
             //Serial.println(hprcRock.finAngle());
             //ailerons.write(servoZero+hprcRock.finAngle());

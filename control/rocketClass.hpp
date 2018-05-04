@@ -29,7 +29,6 @@ public:
     //Inflight sensor update and logging
     int updateSensorData(Adafruit_BNO055 &, Adafruit_BMP280 &);
     int sendDataComms(int);
-    int sendRefComs(int,const imu::Vector<3> &,imu::Vector<3> &);
 
     //In flight info extraction
     float getSpeed();

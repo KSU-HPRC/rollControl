@@ -133,42 +133,19 @@ int rocket::fillModel(int fpsize, int devName){/*
     return 0;
 }
 
-int rocket::sendRefComs(int device,const imu::Vector<3> & g,imu::Vector<3> & m){
-    unsigned char* msg = new unsigned char[packetSize];
-    unsigned char i = 0;
-    toChar(g,msg);
-    i+=3;
-    toChar(m,msg+(i*4));
-    msg[40]=2;
-
-    Wire.beginTransmission(device);
-
-    char j = 0;
-    while (j < packetSize){
-        Wire.write(msg[j]);
-        ++j;
-    }
-
-    Wire.endTransmission();
-    //delete[] out;
-    //out = nullptr;
-    delete[] msg;
-    msg = nullptr;
-    return 0;
-}
-
 int rocket::sendDataComms(int device){
-    unsigned char* msg = new unsigned char[/*packetSize*/32];
+    unsigned char* msg = new unsigned char[32];
     unsigned char i = 0;
-    toChar(Q, msg);
-    i += 4;
-    toChar(a, msg+(i*4));
-    i += 3;
-    /*toChar(P, msg+(i*4));
-    ++i;
-    toChar(T, msg+(i*4));
-    ++i;*/
-    toChar(lastUpdate, msg+(i*4));
+    toCharViaInt(up,msg);
+    i+=6;
+    toCharViaInt(north,msg+i)
+    i+=6;
+    toChar(a,msg+i)
+    i+=12;
+    toChar(lastUpdate, msg+i);
+    i+=4;
+    msg[i]=1;
+
     //msg[4*(++i)] = 1;
 
     //Serial.println("SENDING");
