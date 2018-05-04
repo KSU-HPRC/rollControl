@@ -75,6 +75,7 @@ void loop() {
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
+    delay(100);
     Serial.println(hprcRock.getRoll()*180.0/PI);
     Serial.print(F("Fin A: "));
     Serial.println(hprcRock.finAngle());
@@ -93,6 +94,7 @@ void loop() {
             break;
         case 1:
             //boost phase
+            hprcRock.getSpeed();//To keep the integration working
             if(hprcRock.getA_pointing()<10){
               flightMode++;
               lastEventTime=millis();
