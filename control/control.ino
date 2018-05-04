@@ -71,22 +71,31 @@ void setup() {
     }
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
-    hprcRock.createRefrence(orient, bmp,commsDevice);
+
+    delay(3000);
+    //hprcRock.createRefrence(orient, bmp,commsDevice);
 }
 
 void loop() {
-    Serial.println(F("IN LOOP"));
+    //Serial.println(F("IN LOOP"));
     //any code that needs to run every loop regardless of flightMode.
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
-
-    Serial.println(hprcRock.getPitch());
-    Serial.println(hprcRock.getRoll());
-
+    
+    Serial.print(F("Pitch: "));
+    Serial.println(hprcRock.getPitch()*180.0/PI);
+    Serial.print(F("Roll: "));
+    Serial.println(hprcRock.getRoll()*180.0/PI);
+    Serial.print(F("Fin Angle: "));
+    Serial.println(hprcRock.finAngle());
+    
+    
     hprcRock.sendDataComms(commsDevice);
+    //Serial.println(hprcRock.getA_pointing());
     //Send Sensor Data for logging
     switch (flightMode){
+        
         case 0 :
             //prelaunch
             if(hprcRock.getA_pointing()>20) {
@@ -110,12 +119,25 @@ void loop() {
         case 3:
             //Coast phase, where we control roll
             //ailerons.write(servoZero+5);
+<<<<<<< HEAD
 	        int finAngle = hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock)));
             ailerons.write(finAngle);
             powerLED(finAngle);
+=======
+            ailerons.write(hprcRock.finAngle());
+            //ailerons.write(servoZero+5);
+            //Serial.print(F("Fin a"));
+            //Serial.println(hprcRock.finAngle());
+            //ailerons.write(servoZero+hprcRock.finAngle());
+            if(millis()-lastEventTime>=3000){
+              flightMode++;
+              lastEventTime=millis();
+            }
+>>>>>>> 63023b10c4bf75af50cf050158035b655243e768
             break;
         case 4:
             //Decent phase, initial
+            ailerons.write(servoZero);
             break;
         case 5:
             //Decent phase, after main chute deply
@@ -124,6 +146,8 @@ void loop() {
             //on ground
             break;
     }
+    //For debug
+    delay(1000);
 }
 
 void receiveHandler(int bytesReceived){

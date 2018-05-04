@@ -14,7 +14,7 @@
 #define commsDevice 19
 #define fpacc 5
 #define numBytes 64
-#define packetSize 22
+#define packetSize 42
 
 
 class rocket {
@@ -22,7 +22,9 @@ public:
     rocket();
     ~rocket(){};
     int fillModel(int, int);
-    int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&,int); //Calculates the refrence frame vectors
+    //int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&,int); //Calculates the refrence frame vectors
+
+    void beginRotation(){plan.beginRotation(lastUpdate/1000); }
 
     //Inflight sensor update and logging
     int updateSensorData(Adafruit_BNO055 &, Adafruit_BMP280 &);
@@ -73,7 +75,7 @@ private:
     // Location Data and Trajectory
     // All values should be in ground frame.
 
-    imu::Vector<3>v;
+    float v;
     imu::Vector<3>a;
 
     //atomospheric data
