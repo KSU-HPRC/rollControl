@@ -4,6 +4,8 @@
 
 #include"math.h"
 
+#define constrain(x,y,z) ((y<x) ? x : ((y>z)? z: y))
+
 union charFloatConverter{
     unsigned char b[4];
     float f;

@@ -201,6 +201,8 @@ float rocket::inherientTorque(){
     return -getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
 }
 
+float deltaTheta(float,float);
+
 int rocket::finAngle(){
     //Serial.println(getDynamicPressure());
     //Serial.println(goalTorque());
@@ -210,4 +212,11 @@ int rocket::finAngle(){
     if(deltaTheta>180) deltaTheta-=360.0;
     int raw = (180.0/PI)*(k*deltaTheta+c*getRollRate());
     return constrain(-20,raw,20);
+}
+
+float deltaTheta(float a, float b){
+    float res=a-b;
+    if(res>PI) return res-2*PI;
+    else if(res<-PI) return 2*PI+res;
+    else return res;
 }
