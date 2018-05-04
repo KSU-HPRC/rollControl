@@ -77,6 +77,7 @@ void loop() {
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
+    Serial.print(F("Fin Angle: "));
     Serial.println(hprcRock.finAngle());
     
     
@@ -107,11 +108,9 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-<<<<<<< HEAD
             //ailerons.write(servoZero+5);
-            ailerons.write(hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock))));
-=======
-            ailerons.write(servoZero+5);
+            ailerons.write(hprcRock.finAngle());
+            //ailerons.write(servoZero+5);
             //Serial.print(F("Fin a"));
             //Serial.println(hprcRock.finAngle());
             //ailerons.write(servoZero+hprcRock.finAngle());
@@ -119,7 +118,6 @@ void loop() {
               flightMode++;
               lastEventTime=millis();
             }
->>>>>>> f1fba19952a03e3a411ed244dda8bc5dfa2d7a1f
             break;
         case 4:
             //Decent phase, initial

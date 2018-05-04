@@ -44,7 +44,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
 
         Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
         a =bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); // convert a into the orignal frame
-        
+
         T=baro.readTemperature();
         P=baro.readPressure();
 
@@ -208,8 +208,8 @@ int rocket::finAngle(){
     //Serial.println(goalTorque());
     float k=(5/45)*maxQ/getDynamicPressure();
     float c=4.0*k/(omega_0*omega_0);
-    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle())*(180.0/PI)+c*getRollRate());
-    return constrain(-20,raw,20);
+    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle(millis()))*(180.0/PI)+c*getRollRate());
+    return constrainFin(-20,raw,20);
 }
 
 float deltaTheta(float a, float b){
