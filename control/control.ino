@@ -3,7 +3,7 @@
 #define commsRst 6
 #define controlRst 7
 #define servoPin 8
-#define servoZero 10
+#define servoZero 20
 
 //Global variables;
 
@@ -72,13 +72,14 @@ void loop() {
 
     }
     
-    Serial.print(F("Pitch: "));
+    /*Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
-    delay(100);
     Serial.println(hprcRock.getRoll()*180.0/PI);
-    Serial.print(F("Fin A: "));
+    Serial.print(F("Fin A: "));*/
+    
     Serial.println(hprcRock.finAngle());
+    ailerons.write(hprcRock.finAngle());
     
     //hprcRock.sendDataComms(commsDevice);
     //Serial.println(hprcRock.getA_pointing());
@@ -109,8 +110,6 @@ void loop() {
         case 3:
             //Coast phase, where we control roll
             ailerons.write(servoZero+5);
-            Serial.print(F("Fin a"));
-            Serial.println(hprcRock.finAngle());
             //ailerons.write(servoZero+hprcRock.finAngle());
             if(millis()-lastEventTime>=3000){
               flightMode++;
@@ -129,7 +128,7 @@ void loop() {
             break;
     }
     //For debug
-    delay(1000);
+    //delay(1000);
 }
 
 void receiveHandler(int bytesReceived){

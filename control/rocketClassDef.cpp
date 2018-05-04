@@ -171,9 +171,9 @@ int rocket::sendDataComms(int device){
 float deltaTheta(float,float);
 
 int rocket::finAngle(){
-    Serial.println(F("Test"));
     float k = getSpringConstant();
     float c = getDampingConstant();
+    
     int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle(millis())*(PI/180))+c*getRollRate())*(minFullDeflect/180.0);
     return constrainFins(-20,raw,20);
 }
@@ -186,8 +186,8 @@ float deltaTheta(float a, float b){
 }
 
 float rocket::getDampingConstant(){
-    return 2*getDampingConstant()/omega_0;
+    return 2*getSpringConstant()/omega_0;
 }
 float rocket::getSpringConstant(){
-    return (getSpeedSq()/(maxSpeed*maxSpeed))*(P/maxPress)*(minTemp/T);
+    return getSpeedSq()/(maxSpeed*maxSpeed)*(P/maxPress)*(minTemp/T);
 }
