@@ -3,7 +3,7 @@
 #include"utility.hpp"
 #include "math.h"
 
-#define constrain(x,y,z) ((y<x) ? x : ((y>z)? z: x))
+
 
 char hex[16] = {'0','1','2','3','4','5','6','7','8','9',
                 'A','B','C','D','E','F'};
