@@ -38,16 +38,9 @@ public:
     float getRollRate();
     float getPitch();
     float getA_pointing();
-    float getDynamicPressure();
 
-    float getDampingConstant() { return dampingConst; }
-    float getSpringConstant()  { return springConst; }
-    float getRollResistance()  { return rollResist; }
-    float getSystemStrength()  { return systemStrength; }
-
-    float goalTorque();
-    float inherientTorque();
-    float deltaTorque(){return goalTorque()-inherientTorque();};
+    float getDampingConstant();
+    float getSpringConstant();
 
     int finAngle();
 
@@ -86,12 +79,6 @@ private:
     bool pitchUp2Date;
     bool rollMatrixUp2Date;
     bool speedUp2Date;
-
-    float rollResist;
-    float systemStrength;
-
-    float springConst;
-    float dampingConst;
 
     float omega;
     float calibrationPressure;

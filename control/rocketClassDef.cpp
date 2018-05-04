@@ -4,9 +4,13 @@
 #define maxQ ((293.15*101300.0*mOverR)*122500.0/2)
 
 #define omega_0 4.0
+#define maxSpeed 350.0
+#define maxPress 101300.0
+#define minTemp 273.15
+#define minFullDeflect 5.0
+
 
 using imu::Vector;
-
 
 rocket::rocket(){
     // Orientation Data
@@ -43,9 +47,9 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
         lastUpdate=current;
 
         Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
-        a =bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); // convert a into the orignal frame
+        a = bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); // convert a into the orignal frame
         
-        T=baro.readTemperature();
+        T=baro.readTemperature()+minTemp;
         P=baro.readPressure();
 
         up=bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY)*(-1);
@@ -103,9 +107,6 @@ float rocket::getA_pointing(){
     return a[0];
 }
 
-float rocket::getDynamicPressure(){
-    return ((P/(T+273.15))*mOverR)*getSpeedSq()/2;
-}
 
 int rocket::fillModel(int fpsize, int devName){/*
     int property = 0;
@@ -189,26 +190,13 @@ int rocket::sendDataComms(int device){
     msg = nullptr;
 }
 
-float rocket::goalTorque(){
-    //return -getSpringConstant()*(plan.getTargetAngle(lastUpdate/1000)-getRoll())-getDampingConstant()*getRollRate();
-    float result=-getSpringConstant()*(0-getRoll())-getDampingConstant()*getRollRate();
-    //Serial.println(F("hi"));
-    //Serial.println(result);
-    return result;
-}
-
-float rocket::inherientTorque(){
-    return -getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
-}
 
 float deltaTheta(float,float);
 
 int rocket::finAngle(){
-    //Serial.println(getDynamicPressure());
-    //Serial.println(goalTorque());
-    float k=(5/45)*maxQ/getDynamicPressure();
-    float c=4.0*k/(omega_0*omega_0);
-    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle())*(180.0/PI)+c*getRollRate());
+    float k = getSpringConstant()
+    float c = getDampingConstant()
+    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle()*(PI/180))+c*getRollRate())*(minFullDeflect/180.0);
     return constrain(-20,raw,20);
 }
 
@@ -217,4 +205,11 @@ float deltaTheta(float a, float b){
     if(res>PI) return res-2*PI;
     else if(res<-PI) return 2*PI+res;
     else return res;
+}
+
+float rocket::getDampingConstant(){
+    return 2*getDampingConstant()/omega_0;
+}
+float rocket::getSpringConstant(){
+    return getSpeedSq()/(maxSpeed*maxSpeed)*(P/maxPress)*(minTemp/T);
 }
