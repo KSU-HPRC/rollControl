@@ -22,7 +22,7 @@ public:
     rocket();
     ~rocket(){};
     int fillModel(int, int);
-    int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&,int); //Calculates the refrence frame vectors
+    //int createRefrence(Adafruit_BNO055&, Adafruit_BMP280&,int); //Calculates the refrence frame vectors
 
     void beginRotation(){plan.beginRotation(lastUpdate/1000); }
 

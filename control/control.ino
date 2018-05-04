@@ -62,7 +62,7 @@ void setup() {
     flightMode=0;
 
     delay(3000);
-    hprcRock.createRefrence(orient, bmp,commsDevice);
+    //hprcRock.createRefrence(orient, bmp,commsDevice);
 }
 
 void loop() {
@@ -71,12 +71,13 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
-    /*
+    
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
-    */
+    Serial.println(hprcRock.finAngle());
+    
     
     hprcRock.sendDataComms(commsDevice);
     //Serial.println(hprcRock.getA_pointing());
@@ -126,7 +127,7 @@ void loop() {
             break;
     }
     //For debug
-    //delay(1000);
+    delay(1000);
 }
 
 void receiveHandler(int bytesReceived){

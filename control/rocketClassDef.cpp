@@ -1,7 +1,7 @@
 #include "rocketClass.hpp"
 
 #define mOverR (0.02897/8.3144598)
-#define maxQ = ((293.15*101300.0*mOverR)*122500.0/2)
+#define maxQ ((293.15*101300.0*mOverR)*122500.0/2)
 
 #define omega_0 4.0
 
@@ -28,7 +28,8 @@ float rocket::getSpeed(){
         v+=a[0]*deltaT;
         speedUp2Date=true;
     }
-    return v;
+    //return v;
+    return 223;
 }
 float rocket::getSpeedSq(){
     float vMag=getSpeed();
@@ -66,7 +67,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
 
 float rocket::getPitch(){
     if (!pitchUp2Date){
-        pitch=asin(up.[0]);
+        pitch=asin(up[0]);
     }
     pitchUp2Date = true;
     return pitch;
@@ -75,13 +76,12 @@ float rocket::getPitch(){
 float rocket::getRoll(){
     if(!rollUp2Date){
         float oldRoll=roll;
-        Vector<3> ref;
         getPitch();
 
-        ref=rollRef-up*rollRef.dot(up)*(pitch>0 ? 1 : -1);
+        Vector<3> ref=rollRef-up*(rollRef.dot(up))*(pitch>0 ? 1 : -1);
         ref.normalize();
 
-        roll=(ref[1]>0) ? acos(ref[2]) : 2*PI-acos(ref[2]);
+        roll=(ref.dot(north.cross(up))>0) ? acos(ref.dot(north)) : 2*PI-acos(ref.dot(north));
 
         //Calculate roll rate:
         if(oldRoll > 7.0/4.0*PI && roll < 1.0/4.0*PI){ //Roll has likely passed from near all the way around the way around the circle through zero.
@@ -89,8 +89,8 @@ float rocket::getRoll(){
         } else if(roll > 7.0/4.0*PI && oldRoll < 1.0/4.0*PI){ //Roll has likely passed from barely around the circle through zero
             rollRate=(roll-oldRoll-2.0*PI)/deltaT;
         } else rollRate=(roll-oldRoll)/deltaT; //Roll has not passed through zero.
+        rollUp2Date = true;
     }
-    rollUp2Date = true;
     return roll;
 }
 
@@ -209,7 +209,5 @@ int rocket::finAngle(){
     float deltaTheta=getRoll()-plan.getTargetAngle(millis())*(PI/180.0);
     if(deltaTheta>180) deltaTheta-=360.0;
     int raw = (180.0/PI)*(k*deltaTheta+c*getRollRate());
-    if(raw>15) return 15;
-    if(raw<-15) return -15;
-    return raw;
+    return constrain(-20,raw,20);
 }
