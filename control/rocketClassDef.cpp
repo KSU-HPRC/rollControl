@@ -31,7 +31,7 @@ rocket::rocket(){
     springConst =1;
     dampingConst; 0.01613636;
 
-    char testPlan[] = "#2;~0901000;+2701000;";
+    char testPlan[] = "#3;~0901000;+901000;~2702000;";
     plan.parseFlightPlan(testPlan);
 }
 

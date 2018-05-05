@@ -136,10 +136,6 @@ void loop() {
               digitalWrite(targetAnglePin, LOW);
             }
             ailerons.write(servoZero + finAngle);
-            //if(millis()-lastEventTime>=3000){
-            //  flightMode++;
-            //  lastEventTime=millis();
-            //}
             break;
         case 4:
             //Decent phase, initial
