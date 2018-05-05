@@ -189,5 +189,5 @@ float rocket::getDampingConstant(){
     return 2*getSpringConstant()/omega_0;
 }
 float rocket::getSpringConstant(){
-    return getSpeedSq()/(maxSpeed*maxSpeed)*(P/maxPress)*(minTemp/T);
+    return ((maxSpeed*maxSpeed)/getSpeedSq())*(maxPress/P)*(T/minTemp);
 }
