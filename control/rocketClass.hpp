@@ -58,7 +58,6 @@ private:
     //Ground frame basis vectors:
     imu::Vector<3> up;
     imu::Vector<3> north;
-    imu::Vector<3> east;
 
     //Rocked basis vectors
     imu::Vector<3> pointing; //Something like (0,0,1)
