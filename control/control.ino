@@ -82,20 +82,20 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
-    
+
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("Roll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
     Serial.print(F("Fin Angle: "));
     Serial.println(hprcRock.finAngle());
-    
-    
+
+
     hprcRock.sendDataComms(commsDevice);
     //Serial.println(hprcRock.getA_pointing());
     //Send Sensor Data for logging
     switch (flightMode){
-        
+
         case 0 :
             //prelaunch
             if(hprcRock.getA_pointing()>20) {
@@ -119,11 +119,6 @@ void loop() {
         case 3:
             //Coast phase, where we control roll
             //ailerons.write(servoZero+5);
-<<<<<<< HEAD
-	        int finAngle = hprcRock.finAngle(deltaTorque(hprcRock,goalTorque(hprcRock)));
-            ailerons.write(finAngle);
-            powerLED(finAngle);
-=======
             ailerons.write(hprcRock.finAngle());
             //ailerons.write(servoZero+5);
             //Serial.print(F("Fin a"));
@@ -133,7 +128,6 @@ void loop() {
               flightMode++;
               lastEventTime=millis();
             }
->>>>>>> 63023b10c4bf75af50cf050158035b655243e768
             break;
         case 4:
             //Decent phase, initial
@@ -194,8 +188,6 @@ void newFlightPlan(){
 
 void sendAck(){ Wire.write('0'); }
 void sendErr(){ Wire.write('1'); }
-<<<<<<< HEAD
-
 void powerLED(int finAngle){
     if (finAngle > 0){
         red.digitalWrite(0xff);
@@ -213,5 +205,3 @@ void powerLED(int finAngle){
         blue.digitalWrite(0xff);
     }
 }
-=======
->>>>>>> 8923bc51007800d3297a035d33442c8304d0c41d
