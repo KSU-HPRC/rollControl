@@ -4,6 +4,10 @@
 #define maxQ ((293.15*101300.0*mOverR)*122500.0/2)
 
 #define omega_0 4.0
+#define maxSpeed 350.0
+#define maxPress 101300.0
+#define minTemp 273.15
+#define minFullDeflect 5.0
 
 using imu::Vector;
 
@@ -44,7 +48,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
 
         Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
         a =bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); // convert a into the orignal frame
-
+        
         T=baro.readTemperature();
         P=baro.readPressure();
 
@@ -103,9 +107,6 @@ float rocket::getA_pointing(){
     return a[0];
 }
 
-float rocket::getDynamicPressure(){
-    return ((P/(T+273.15))*mOverR)*getSpeedSq()/2;
-}
 
 int rocket::fillModel(int fpsize, int devName){/*
     int property = 0;
@@ -132,42 +133,19 @@ int rocket::fillModel(int fpsize, int devName){/*
     return 0;
 }
 
-int rocket::sendRefComs(int device,const imu::Vector<3> & g,imu::Vector<3> & m){
-    unsigned char* msg = new unsigned char[packetSize];
-    unsigned char i = 0;
-    toChar(g,msg);
-    i+=3;
-    toChar(m,msg+(i*4));
-    msg[40]=2;
-
-    Wire.beginTransmission(device);
-
-    char j = 0;
-    while (j < packetSize){
-        Wire.write(msg[j]);
-        ++j;
-    }
-
-    Wire.endTransmission();
-    //delete[] out;
-    //out = nullptr;
-    delete[] msg;
-    msg = nullptr;
-    return 0;
-}
-
 int rocket::sendDataComms(int device){
-    unsigned char* msg = new unsigned char[/*packetSize*/32];
+    unsigned char* msg = new unsigned char[32];
     unsigned char i = 0;
-    toChar(Q, msg);
-    i += 4;
-    toChar(a, msg+(i*4));
-    i += 3;
-    /*toChar(P, msg+(i*4));
-    ++i;
-    toChar(T, msg+(i*4));
-    ++i;*/
-    toChar(lastUpdate, msg+(i*4));
+    toCharViaInt(up,msg);
+    i+=6;
+    toCharViaInt(north,msg+i);
+    i+=6;
+    toChar(a,msg+i);
+    i+=12;
+    toChar(lastUpdate, msg+i);
+    i+=4;
+    msg[i]=1;
+
     //msg[4*(++i)] = 1;
 
     //Serial.println("SENDING");
@@ -189,27 +167,15 @@ int rocket::sendDataComms(int device){
     msg = nullptr;
 }
 
-float rocket::goalTorque(){
-    //return -getSpringConstant()*(plan.getTargetAngle(lastUpdate/1000)-getRoll())-getDampingConstant()*getRollRate();
-    float result=-getSpringConstant()*(0-getRoll())-getDampingConstant()*getRollRate();
-    //Serial.println(F("hi"));
-    //Serial.println(result);
-    return result;
-}
-
-float rocket::inherientTorque(){
-    return -getRollRate()*getRollResistance()*getDynamicPressure()/getSpeed();
-}
 
 float deltaTheta(float,float);
 
 int rocket::finAngle(){
-    //Serial.println(getDynamicPressure());
-    //Serial.println(goalTorque());
-    float k=(5/45)*maxQ/getDynamicPressure();
-    float c=4.0*k/(omega_0*omega_0);
-    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle(millis()))*(180.0/PI)+c*getRollRate());
-    return constrainFin(-20,raw,20);
+    float k = getSpringConstant();
+    float c = getDampingConstant();
+    
+    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle(millis())*(PI/180))+c*getRollRate())*(minFullDeflect/180.0);
+    return constrainFins(-20,raw,20);
 }
 
 float deltaTheta(float a, float b){
@@ -217,4 +183,11 @@ float deltaTheta(float a, float b){
     if(res>PI) return res-2*PI;
     else if(res<-PI) return 2*PI+res;
     else return res;
+}
+
+float rocket::getDampingConstant(){
+    return 2*getSpringConstant()/omega_0;
+}
+float rocket::getSpringConstant(){
+    return ((maxSpeed*maxSpeed)/getSpeedSq())*(maxPress/P)*(T/minTemp);
 }
