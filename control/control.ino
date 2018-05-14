@@ -32,7 +32,7 @@ void setup() {
      pinMode(launchPin, OUTPUT);
      digitalWrite(launchPin, LOW);
      pinMode(launchPin, INPUT);
-    
+
     pinMode(systemLedPin, OUTPUT);
     pinMode(targetAnglePin, OUTPUT);
 
@@ -41,12 +41,12 @@ void setup() {
     Wire.onReceive(receiveHandler);
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
-    
+
     ailerons.attach(servoPin);
-    ailerons.write(servoZero); 
+    ailerons.write(servoZero);
     Serial.begin(57600);
     Wire.begin(75);
-    
+
     Serial.print(F("Initializing SD Card..."));
     resetDev(commsRst);
     delay(1500);
@@ -76,6 +76,16 @@ void setup() {
     Serial.println(F("Sensors Initilized"));
     flightMode=0;
 
+    if(!hprcRock.getPlan().validFlightPlan()){
+        Serial.println(F("INVALID FLIGHTPLAN"));
+        while(!hprcRock.getPlan().validFlightPlan()){
+            digitalWrite(systemLedPin, HIGH);
+            delay(50);
+            digitalWrite(systemLedPin, LOW);
+            delay(50);
+        }
+    }
+    
     delay(3000);
     hprcRock.createRefrence(orient, bmp,commsDevice);
     digitalWrite(systemLedPin, HIGH);
@@ -87,16 +97,16 @@ void loop() {
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
     }
-    
+
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
     Serial.print(F("\t\tRoll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
-    
-    
+
+
     //Send Sensor Data for logging
     switch (flightMode){
-        
+
         case 0 :
             launchConnection = digitalRead(launchPin);
             if (launchConnection == LOW)
@@ -137,6 +147,7 @@ void loop() {
               digitalWrite(targetAnglePin, LOW);
             }
             ailerons.write(servoZero + finAngle);
+            hprcRock.sendDataComms(commsDevice);
             break;
         case 4:
             //Decent phase, initial
