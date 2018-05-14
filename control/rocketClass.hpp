@@ -29,7 +29,6 @@ public:
     //Inflight sensor update and logging
     int updateSensorData(Adafruit_BNO055 &, Adafruit_BMP280 &);
     int sendDataComms(int);
-    int sendRefComs(int,const imu::Vector<3> &,imu::Vector<3> &);
 
     //In flight info extraction
     float getSpeed();
@@ -38,16 +37,9 @@ public:
     float getRollRate();
     float getPitch();
     float getA_pointing();
-    float getDynamicPressure();
 
-    float getDampingConstant() { return dampingConst; }
-    float getSpringConstant()  { return springConst; }
-    float getRollResistance()  { return rollResist; }
-    float getSystemStrength()  { return systemStrength; }
-
-    float goalTorque();
-    float inherientTorque();
-    float deltaTorque(){return goalTorque()-inherientTorque();};
+    float getDampingConstant();
+    float getSpringConstant();
 
     int finAngle();
 
@@ -66,7 +58,6 @@ private:
     //Ground frame basis vectors:
     imu::Vector<3> up;
     imu::Vector<3> north;
-    imu::Vector<3> east;
 
     //Rocked basis vectors
     imu::Vector<3> pointing; //Something like (0,0,1)
@@ -86,12 +77,6 @@ private:
     bool pitchUp2Date;
     bool rollMatrixUp2Date;
     bool speedUp2Date;
-
-    float rollResist;
-    float systemStrength;
-
-    float springConst;
-    float dampingConst;
 
     float omega;
     float calibrationPressure;
