@@ -124,7 +124,7 @@ void loop() {
             Serial.print("\t\t\tAngleModifier: ");
             Serial.println(finAngle);
             if(hprcRock.getPitch()<PI/4){
-              //flightMode++;
+              flightMode++;
               lastEventTime=millis();
               digitalWrite(systemLedPin, LOW);
             }
