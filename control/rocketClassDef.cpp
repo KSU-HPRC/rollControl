@@ -28,7 +28,7 @@ rocket::rocket(){
     rollRef=imu::Vector<3>(0,0,1);
 
     // Flight plan must use 3 digit angles.
-    char testPlan[] = "#3;~0901000;+0901000;~2702000;";
+    char testPlan[] = "#3;~0901000;+901000;~2702000;";
     plan.parseFlightPlan(testPlan);
     Serial.println("Parsed");
 }
@@ -45,7 +45,7 @@ int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int devic
     g.normalize();
     up=g*(-1);
 
-    //Get north and east vectors    
+    //Get north and east vectors
     m.normalize();
     north=m-(up*m.dot(up));
     north.normalize(); //Just in case.
@@ -72,7 +72,7 @@ int rocket::updateSensorData(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro){
 
         Q = bno.getQuat(); //Takes a vector and rotates it by the same amount the BNO has since startup
         a =bno.getVector(Adafruit_BNO055::VECTOR_LINEARACCEL); // convert a into the orignal frame
-        
+
         T=baro.readTemperature();
         P=baro.readPressure();
 
@@ -158,35 +158,23 @@ int rocket::fillModel(int fpsize, int devName){/*
 }
 
 int rocket::sendDataComms(int device){
-    unsigned char* msg = new unsigned char[32];
+    unsigned char* msg = new unsigned char[packetSize];
     unsigned char i = 0;
-    toCharViaInt(up,msg);
-    i+=6;
-    toCharViaInt(north,msg+i);
-    i+=6;
-    toChar(a,msg+i);
-    i+=12;
     toChar(lastUpdate, msg+i);
-    i+=4;
-    msg[i]=1;
+    i += 4;
+    toChar(roll, msg+i);
+    i += 4;
+    toChar(pitch, msg+i);
+    i += 4;
 
-    //msg[4*(++i)] = 1;
-
-    //Serial.println("SENDING");
-    Wire.beginTransmission(device);
-    //unsigned char* out = new unsigned char[(packetSize*2) + 1];
-    //toHex(msg, out, packetSize);
+    Wire.beginTransmission(device);;
     char j = 0;
-    while (j < /*packetSize*/ 32){
-        //Serial.print(out[j*2]);
-        //Serial.print(out[(j*2)+1]);
+    while (j < packetSize){
         Wire.write(msg[j]);
         ++j;
     }
 
     Wire.endTransmission();
-    //delete[] out;
-    //out = nullptr;
     delete[] msg;
     msg = nullptr;
 }

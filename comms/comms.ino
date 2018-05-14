@@ -8,7 +8,7 @@
 #define sdPin 10
 #define fpacc 5
 #define controlDevice 75
-#define packetSize 42
+#define packetSize 12
 
 File configf;
 File logger;
