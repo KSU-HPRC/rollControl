@@ -5,8 +5,9 @@
 #define servoPin 8
 #define servoZero 20
 #define launchPin 14
-#define systemPin 15
+#define systemLedPin 15
 #define targetAnglePin 16
+#define finDeflect 20
 
 #define red 15
 #define green 16
@@ -24,8 +25,8 @@ Servo ailerons;
 bool nfpValid;
 bool wireFlag = false;
 unsigned long lastEventTime=0;
-int finA;
 
+float finAngle = 0;
 //Control algorithm functions
 
 float goalTorque(rocket &);
@@ -35,8 +36,8 @@ void setup() {
      pinMode(launchPin, OUTPUT);
      digitalWrite(launchPin, LOW);
      pinMode(launchPin, INPUT);
-    
-    pinMode(systemPin, OUTPUT);
+
+    pinMode(systemLedPin, OUTPUT);
     pinMode(targetAnglePin, OUTPUT);
 
     serialDump();
@@ -85,8 +86,8 @@ void setup() {
     flightMode=0;
 
     delay(3000);
-    digitalWrite(systemPin, HIGH);
-    //hprcRock.createRefrence(orient, bmp,commsDevice);
+    hprcRock.createRefrence(orient, bmp,commsDevice);
+    digitalWrite(systemLedPin, HIGH);
 }
 
 void loop() {
@@ -108,58 +109,60 @@ void loop() {
     hprcRock.sendDataComms(commsDevice);
     //Serial.println(hprcRock.getA_pointing());
 =======
-    
+
+<<<<<<< HEAD
 >>>>>>> 6969cd9ac2d67f6204f63d14e426212d6b1f271c
+=======
+    Serial.print(F("Pitch: "));
+    Serial.println(hprcRock.getPitch()*180.0/PI);
+    Serial.print(F("\t\tRoll: "));
+    Serial.println(hprcRock.getRoll()*180.0/PI);
+
+
+>>>>>>> 4971f785695f4ea1d2a359a15a049906eccbc503
     //Send Sensor Data for logging
     switch (flightMode){
 
         case 0 :
-            //prelaunch
-            ailerons.write(servoZero);
             launchConnection = digitalRead(launchPin);
-            if(/*hprcRock.getA_pointing()>20 ||*/ LOW == launchConnection) {
-                digitalWrite(systemPin, LOW);
+            if (launchConnection == LOW)
+            {
+                Serial.print("Launched");
+                digitalWrite(systemLedPin, LOW);
                 flightMode++;
-                lastEventTime=millis();
             }
             break;
         case 1:
             //boost phase
-            ailerons.write(servoZero);
-            hprcRock.getSpeed();//To keep the integration working
-            if(/*hprcRock.getA_pointing()<10 ||*/ millis()-lastEventTime>=3000){
-              flightMode++;
-              lastEventTime=millis();
-              hprcRock.beginRotation(); 
-            }
+            flightMode++;
+            // Pause until after burnout.
+            delay(3000);
+            // Turn the LED back on when the system comes back on.
+            digitalWrite(systemLedPin, HIGH);
             break;
         case 2:
-            ailerons.write(servoZero);
-            hprcRock.getSpeed();
-            if(millis()-lastEventTime>=0){
-              flightMode++;
-              lastEventTime=millis();
-              digitalWrite(systemPin, HIGH);
-            }
+            flightMode++;
+            hprcRock.beginMoves(millis());
             break;
         case 3:
             //Coast phase, where we control roll
-            //ailerons.write(servoZero+5);
-            finA=hprcRock.finAngle();
-            ailerons.write(servoZero+finA);
+            finAngle = hprcRock.finAngle() * finDeflect;
+            Serial.print("\t\t\tAngleModifier: ");
+            Serial.println(finAngle);
             if(hprcRock.getPitch()<PI/4){
-              flightMode++;
+              //flightMode++;
               lastEventTime=millis();
-              digitalWrite(systemPin, LOW);
+              digitalWrite(systemLedPin, LOW);
             }
-            if (finA == 0)
+            if (finAngle == 0)
             {
-               digitalWrite(targetAnglePin, HIGH);
+              digitalWrite(targetAnglePin, HIGH);
             }
             else
             {
-                digitalWrite(targetAnglePin, LOW);
+              digitalWrite(targetAnglePin, LOW);
             }
+            ailerons.write(servoZero + finAngle);
             break;
         case 4:
             //Decent phase, initial

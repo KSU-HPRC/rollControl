@@ -24,6 +24,7 @@ void flightplan::parseFlightPlan(char* plan)
 {
     /// Returning before the last line of the method will
     /// leave the validFlightPlan() == false.
+    valid = false;
 
     int pos = 0;
 
@@ -110,7 +111,7 @@ void flightplan::parseFlightPlan(char* plan)
             return;
         }
     }
-
+    
     // If it gets here, all formatting is correct.
     valid = true;
 }
@@ -127,6 +128,8 @@ void flightplan::beginRotation(unsigned long time)
 
 int flightplan::getTargetAngle(unsigned long time)
 {
+    Serial.print("\t\t\t\t\t\t\t\t\t\t");
+    Serial.println(moveEndTime);
     // If finished the last move, progress to next stage.
     if (time > moveEndTime)
     {

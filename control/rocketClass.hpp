@@ -44,6 +44,9 @@ public:
     int finAngle();
 
     flightplan& getPlan(){ return plan;}
+    int rocket::createRefrence(Adafruit_BNO055&, Adafruit_BMP280&, int);
+
+    void beginMoves(unsigned long mils) { plan.beginRotation(mils); }
 private:
     // Orientation Data
     imu::Quaternion Q;
@@ -51,6 +54,8 @@ private:
     float pitch;
     float roll;
     float rollRate;
+
+    sensors_event_t sensorData;
 
     unsigned long lastUpdate;
     float deltaT;

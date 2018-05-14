@@ -1,4 +1,5 @@
 #include "rocketClass.hpp"
+#include "bangbang.hpp"
 
 #define mOverR (0.02897/8.3144598)
 #define maxQ ((293.15*101300.0*mOverR)*122500.0/2)
@@ -25,6 +26,29 @@ rocket::rocket(){
 
     pointing=imu::Vector<3>(1,0,0);
     rollRef=imu::Vector<3>(0,0,1);
+
+    // Flight plan must use 3 digit angles.
+    char testPlan[] = "#3;~0901000;+0901000;~2702000;";
+    plan.parseFlightPlan(testPlan);
+    Serial.println("Parsed");
+}
+
+int rocket::createRefrence(Adafruit_BNO055 &bno, Adafruit_BMP280 &baro,int device){
+    Vector<3> g=bno.getVector(Adafruit_BNO055::VECTOR_GRAVITY);
+    Vector<3> m=bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+
+    //Save the refrence data;
+    //sendRefComs(device,g,m);
+
+    //Get the up vector
+    g.normalize();
+    up=g*(-1);
+
+    //Get north and east vectors    
+    m.normalize();
+    north=m-(up*m.dot(up));
+    north.normalize(); //Just in case.
 }
 
 float rocket::getSpeed(){
@@ -171,11 +195,11 @@ int rocket::sendDataComms(int device){
 float deltaTheta(float,float);
 
 int rocket::finAngle(){
-    float k = getSpringConstant();
-    float c = getDampingConstant();
-    
-    int raw = (180.0/PI)*(k*deltaTheta(getRoll(),plan.getTargetAngle(millis())*(PI/180))+c*getRollRate())*(minFullDeflect/180.0);
-    return constrainFins(-20,raw,20);
+    int target = plan.getTargetAngle(millis());
+    Serial.print(F("\t\t\t\t\t\tTarget angle:"));
+    Serial.print(target);
+    float currentAngle = radToDeg(getRoll());
+    return getFinAngle(target, currentAngle);
 }
 
 float deltaTheta(float a, float b){
