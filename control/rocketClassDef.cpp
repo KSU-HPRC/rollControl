@@ -28,7 +28,7 @@ rocket::rocket(){
     rollRef=imu::Vector<3>(0,0,1);
 
     // Flight plan must use 3 digit angles.
-    char testPlan[] = "#3;~0901000;+901000;~2702000;";
+    char testPlan[] = "#3;~0901000;+0901000;~2702000;";
     plan.parseFlightPlan(testPlan);
     Serial.println("Parsed");
 }
