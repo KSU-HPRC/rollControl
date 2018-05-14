@@ -3,8 +3,8 @@
 //
 #include "bangbang.hpp"
 
-const int CENTER = 180;
-#define tolerance 5
+const int CENTER = 180.0;
+#define tolerance 7
 
 /*
  *  Put the current angle in the frame of 180. Works
@@ -53,3 +53,9 @@ int getFinAngle(int targetAngle, float currentAngle)
     currentAngle = frame180(targetAngle, currentAngle);
     return finAngleBased180(currentAngle);
 }
+
+float radToDeg(float rad) 
+{
+  return (rad * 360) / 6.2831;
+}
+

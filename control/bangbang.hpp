@@ -8,6 +8,7 @@
 int frame180(int, int);
 int finAngleBased180(int);
 int getFinAngle(int, float);
+float radToDeg(float);
 
 
 #endif //ROLLCONTROL_BANGBANG_H

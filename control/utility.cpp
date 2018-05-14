@@ -4,6 +4,7 @@
 #include "math.h"
 
 
+
 char hex[16] = {'0','1','2','3','4','5','6','7','8','9',
                 'A','B','C','D','E','F'};
 
@@ -18,7 +19,6 @@ void printVec(imu::Vector<3> v){
 }
 
 float toFloat(unsigned char * c){
-
     charFloatConverter converter;
 
     converter.b[0] = c[0];
@@ -39,6 +39,14 @@ void toChar(float in, unsigned char * c) {
     c[3] = converter.b[3];
 }
 
+void toCharViaInt(float f, unsigned char * c){
+    charFloatConverter converter;
+    f=(f>1 || f<-1) ? (f>0 ? 1 : -1)  : f;
+    converter.i=f*32767;
+    c[0]=converter.b[0];
+    c[1]=converter.b[1];
+}
+
 void toChar(unsigned long in, unsigned char * c) {
     charFloatConverter converter;
     converter.l = in;
@@ -53,6 +61,12 @@ void toChar(imu::Vector<3> v, unsigned char * c){
     toChar((float)v[0],c);
     toChar((float)v[1],c+4);
     toChar((float)v[2],c+8);
+}
+void toCharViaInt(imu::Vector<3> v, unsigned char * c){
+    v.normalize();
+    toCharViaInt((float)v[0],c);
+    toCharViaInt((float)v[1],c+2);
+    toCharViaInt((float)v[2],c+4);
 }
 void toChar(imu::Quaternion q, unsigned char * c){
     toChar((float)q.x(),c);

@@ -11,6 +11,8 @@
 
 //Global variables;
 
+int launchConnection = HIGH;
+
 int flightMode;
 rocket hprcRock;
 Adafruit_BMP280 bmp;
@@ -21,27 +23,24 @@ bool wireFlag = false;
 unsigned long lastEventTime=0;
 
 float finAngle = 0;
-int launchConnection = HIGH;
-
 //Control algorithm functions
 
 float goalTorque(rocket &);
 float deltaTorque(rocket&,float);
 
 void setup() {
-    delay(1000); // Necessary for syncronization of boards
+     pinMode(launchPin, OUTPUT);
+     digitalWrite(launchPin, LOW);
+     pinMode(launchPin, INPUT);
+    
+    pinMode(systemLedPin, OUTPUT);
+    pinMode(targetAnglePin, OUTPUT);
+
     serialDump();
     Wire.onRequest(requestHandler);
     Wire.onReceive(receiveHandler);
     pinMode(commsRst, OUTPUT);
     pinMode(commsRst, HIGH);
-    
-    pinMode(launchPin, OUTPUT);
-    digitalWrite(launchPin, LOW);
-    pinMode(launchPin, INPUT);
-    
-    pinMode(systemLedPin, OUTPUT);
-    pinMode(targetAnglePin, OUTPUT);
     
     ailerons.attach(servoPin);
     ailerons.write(servoZero); 
@@ -89,15 +88,12 @@ void loop() {
 
     }
     
-    /*
     Serial.print(F("Pitch: "));
     Serial.println(hprcRock.getPitch()*180.0/PI);
-    Serial.print(F("Roll: "));
+    Serial.print(F("\t\tRoll: "));
     Serial.println(hprcRock.getRoll()*180.0/PI);
-    */
     
-    hprcRock.sendDataComms(commsDevice);
-    //Serial.println(hprcRock.getA_pointing());
+    
     //Send Sensor Data for logging
     switch (flightMode){
         
@@ -127,6 +123,11 @@ void loop() {
             finAngle = hprcRock.finAngle() * finDeflect;
             Serial.print("\t\t\tAngleModifier: ");
             Serial.println(finAngle);
+            if(hprcRock.getPitch()<PI/4){
+              //flightMode++;
+              lastEventTime=millis();
+              digitalWrite(systemLedPin, LOW);
+            }
             if (finAngle == 0)
             {
               digitalWrite(targetAnglePin, HIGH);
