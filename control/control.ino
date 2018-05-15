@@ -120,10 +120,10 @@ void loop() {
             break;
         case 3:
             //Coast phase, where we control roll
-            finAngle = hprcRock.finAngle() * finDeflect;
+            finAngle = hprcRock.finAngle()* -1 * finDeflect;
             Serial.print("\t\t\tAngleModifier: ");
             Serial.println(finAngle);
-            if(hprcRock.getPitch()<PI/4){
+            if(hprcRock.getPitch()<PI/8){
               flightMode++;
               lastEventTime=millis();
               digitalWrite(systemLedPin, LOW);
