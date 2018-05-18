@@ -86,18 +86,16 @@ void loop() {
     //any code that needs to run every loop regardless of flightMode.
     if (hprcRock.updateSensorData(orient, bmp) == 0){
 
-    }
-    
-    Serial.print(F("Pitch: "));
-    Serial.println(hprcRock.getPitch()*180.0/PI);
-    Serial.print(F("\t\tRoll: "));
-    Serial.println(hprcRock.getRoll()*180.0/PI);
-    
+    }   
     
     //Send Sensor Data for logging during after 
     // launch and before apogee.
     if (0 < flightMode && flightMode < 4) 
     {
+        Serial.print(F("Pitch: "));
+        Serial.println(hprcRock.getPitch()*180.0/PI);
+        Serial.print(F("\t\tRoll: "));
+        Serial.println(hprcRock.getRoll()*180.0/PI);
         hprcRock.sendDataComms(commsDevice);
     }
     
