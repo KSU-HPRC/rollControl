@@ -83,10 +83,20 @@ void loop(){
             delay(1);
             if (inc == '\0'){
                 if (calc[0] != sec1 || calc[1] != sec2) break;
-                int i = 2; // skipping security chars
-                while(calc[i] != '\0'){
-                    // critical section
-                }
+                // Looping Unnecessary
+                int one = calc[2] - '0';
+                int two = calc[4] - '0';
+                int three = calc[6] - '0';
+                int answer;
+                if (calc[3] == '+') answer = one + two;
+                else if (calc[3] == '*') answer = one * two;
+                else if (calc[3] == '-') answer = one - two;
+                if (calc[5] == '+') answer += three;
+                else if (calc[5] == '*') answer *= three;
+                else if (calc[5] == '-') answer -= three;
+                Serial.print("ks");
+                Serial.println(((answer/10)+'0'));
+                Serial.println(((answer%10)+'0'));
             }
             else if (inc == -1) continue;
             else calc = caAppend(calc, inc);
