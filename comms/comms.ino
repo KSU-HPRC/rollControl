@@ -15,7 +15,10 @@ File logger;
 int cmdSqnc = 0;
 unsigned char* data = new unsigned char[packetSize];
 char* fp2 = nullptr;
-bool keepListening = false;
+char* calc = nullptr;
+int commsFunction = -1;
+char sec1 = 'k';
+char sec2 = 's';
 
 void serialEvent() {
   if (Serial.available()) {
@@ -35,32 +38,66 @@ void setup(){
 }
 
 void loop(){
-    //Serial.println("LOOPING");
-    while (keepListening){
-        char inc = Serial.read();
-        delay(1);
-        if (inc == '\0'){ // entire FP received
-            int i = 0;
-            while(fp2[i] != '\0'){
-                Wire.write(fp2[i]);
-                ++i;
+    char cmd = Serial.read();
+    if (cmd == '`') commsFunction = 0;
+    else if (cmd == '~') commsFunction = 1;
+    else comms = -1;
+
+    bool keepListening = true;
+
+    // New flight Plan
+    if (commsFunction == 0){
+        while (keepListening){
+            char inc = Serial.read();
+            delay(1);
+            if (inc == '\0'){ // entire FP received
+                if (fp2[0] != sec1 || fp2[1] != sec2) break;
+                int i = 2; // skipping the security chars
+                while(fp2[i] != '\0'){
+                    Wire.write(fp2[i]);
+                    ++i;
+                    Serial.println(F("NEW FLIGHT PLAN RECEIVED"));
+                }
+                Wire.requestFrom(controlDevice, 1);
+                if (Wire.read() == '0'){
+                    Serial.println(F("VALID FLIGHT PLAN"));
+                    keepListening = false;
+                    break;
+                }
+                else {
+                    Serial.println(F("INVALID FLIGHT PLAN. TRY AGAIN"));
+                    delete[] fp2;
+                    fp2 = nullptr;
+                    continue;
+                }
             }
-            Wire.requestFrom(controlDevice, 1);
-            if (Wire.read() == '0'){
-                Serial.println(F("VALID FLIGHT PLAN"));
-                keepListening = false;
-                break;
-            }
-            else {
-                Serial.println(F("INVALID FLIGHT PLAN. TRY AGAIN"));
-                delete[] fp2;
-                fp2 = nullptr;
-                continue;
-            }
+            else if (inc == -1) continue;
+            else fp2 = caAppend(fp2, inc);
         }
-        else if (inc == -1) continue;
-        else fp2 = caAppend(fp2, inc);
     }
+
+    // Calculator
+    else if (commsFunction == 1){
+        while (keepListening){
+            char inc = Serial.read();
+            delay(1);
+            if (inc == '\0'){
+                if (calc[0] != sec1 || calc[1] != sec2) break;
+                int i = 2; // skipping security chars
+                while(calc[i] != '\0'){
+                    // critical section
+                }
+            }
+            else if (inc == -1) continue;
+            else calc = caAppend(calc, inc);
+        }
+    }
+
+    //Do nothing
+    else {
+
+    }
+
 }
 
 void requestHandler(){
