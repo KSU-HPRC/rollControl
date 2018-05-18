@@ -94,7 +94,13 @@ void loop() {
     Serial.println(hprcRock.getRoll()*180.0/PI);
     
     
-    //Send Sensor Data for logging
+    //Send Sensor Data for logging during after 
+    // launch and before apogee.
+    if (0 < flightMode && flightMode < 4) 
+    {
+        hprcRock.sendDataComms(commsDevice);
+    }
+    
     switch (flightMode){
         
         case 0 :
