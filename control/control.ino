@@ -5,8 +5,9 @@
 #define servoPin 8
 #define servoZero 20
 #define launchPin 14
-#define systemLedPin 15
-#define targetAnglePin 16
+#define redLEDPin 15
+#define greenLEDPin 16
+#define blueLEDPin 17
 #define finDeflect 20
 
 //Global variables;
@@ -33,8 +34,9 @@ void setup() {
      digitalWrite(launchPin, LOW);
      pinMode(launchPin, INPUT);
     
-    pinMode(systemLedPin, OUTPUT);
-    pinMode(targetAnglePin, OUTPUT);
+    pinMode(redLEDPin, OUTPUT);
+    pinMode(greenLEDPin, OUTPUT);
+    pinMode(blueLEDPin, OUTPUT);
 
     serialDump();
     Wire.onRequest(requestHandler);
@@ -78,7 +80,7 @@ void setup() {
 
     delay(3000);
     hprcRock.createRefrence(orient, bmp,commsDevice);
-    digitalWrite(systemLedPin, HIGH);
+    digitalWrite(redLEDPin, HIGH);
 }
 
 void loop() {
@@ -106,7 +108,7 @@ void loop() {
             if (launchConnection == LOW)
             {
                 Serial.print("Launched");
-                digitalWrite(systemLedPin, LOW);
+                digitalWrite(redLEDPin, LOW);
                 flightMode++;
             }
             break;
@@ -116,7 +118,7 @@ void loop() {
             // Pause until after burnout.
             delay(3000);
             // Turn the LED back on when the system comes back on.
-            digitalWrite(systemLedPin, HIGH);
+            digitalWrite(redLEDPin, HIGH);
             break;
         case 2:
             flightMode++;
@@ -127,20 +129,34 @@ void loop() {
             finAngle = hprcRock.finAngle()* -1 * finDeflect;
             Serial.print("\t\t\tAngleModifier: ");
             Serial.println(finAngle);
-            if(hprcRock.getPitch()<PI/8){
-              flightMode++;
-              lastEventTime=millis();
-              digitalWrite(systemLedPin, LOW);
-            }
+
             if (finAngle == 0)
             {
-              digitalWrite(targetAnglePin, HIGH);
+              digitalWrite(greenLEDPin, HIGH);
+              digitalWrite(blueLEDPin, LOW);
+              digitalWrite(redLEDPin, LOW);
+            }
+            else if (finAngle > 0)
+            {
+              digitalWrite(greenLEDPin, LOW);
+              digitalWrite(blueLEDPin, HIGH);
+              digitalWrite(redLEDPin, LOW);            
             }
             else
             {
-              digitalWrite(targetAnglePin, LOW);
+              digitalWrite(greenLEDPin, LOW);
+              digitalWrite(blueLEDPin, LOW);
+              digitalWrite(redLEDPin, HIGH);            
             }
-            ailerons.write(servoZero + finAngle);
+            
+            if(hprcRock.getPitch()<PI/8){
+              flightMode++;
+              lastEventTime=millis();
+              digitalWrite(greenLEDPin, LOW);
+              digitalWrite(blueLEDPin, LOW);
+              digitalWrite(redLEDPin, LOW);
+            }
+            ailerons.write(servoZero + finAngle);  
             break;
         case 4:
             //Decent phase, initial
