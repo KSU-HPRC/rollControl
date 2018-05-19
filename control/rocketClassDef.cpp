@@ -158,35 +158,23 @@ int rocket::fillModel(int fpsize, int devName){/*
 }
 
 int rocket::sendDataComms(int device){
-    unsigned char* msg = new unsigned char[32];
+    unsigned char* msg = new unsigned char[packetSize];
     unsigned char i = 0;
-    toCharViaInt(up,msg);
-    i+=6;
-    toCharViaInt(north,msg+i);
-    i+=6;
-    toChar(a,msg+i);
-    i+=12;
     toChar(lastUpdate, msg+i);
-    i+=4;
-    msg[i]=1;
+    i += 4;
+    toChar(roll, msg+i);
+    i += 4;
+    toChar(pitch, msg+i);
+    i += 4;
 
-    //msg[4*(++i)] = 1;
-
-    //Serial.println("SENDING");
-    Wire.beginTransmission(device);
-    //unsigned char* out = new unsigned char[(packetSize*2) + 1];
-    //toHex(msg, out, packetSize);
+    Wire.beginTransmission(device);;
     char j = 0;
-    while (j < /*packetSize*/ 32){
-        //Serial.print(out[j*2]);
-        //Serial.print(out[(j*2)+1]);
+    while (j < packetSize){
         Wire.write(msg[j]);
         ++j;
     }
 
     Wire.endTransmission();
-    //delete[] out;
-    //out = nullptr;
     delete[] msg;
     msg = nullptr;
 }

@@ -14,7 +14,7 @@
 #define commsDevice 19
 #define fpacc 5
 #define numBytes 64
-#define packetSize 42
+#define packetSize 12
 
 
 class rocket {
