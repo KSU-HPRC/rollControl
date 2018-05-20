@@ -16,6 +16,8 @@ int cmdSqnc = 0;
 unsigned char* data = new unsigned char[packetSize];
 char* fp2 = nullptr;
 bool keepListening = false;
+char* inData = nullptr;
+int command = -1;
 
 void serialEvent() {
   if (Serial.available()) {
@@ -35,31 +37,53 @@ void setup(){
 }
 
 void loop(){
-    //Serial.println("LOOPING");
-    while (keepListening){
         char inc = Serial.read();
-        delay(1);
-        if (inc == '\0'){ // entire FP received
-            int i = 0;
-            while(fp2[i] != '\0'){
-                Wire.write(fp2[i]);
-                ++i;
+    delay(1);
+    if (inc != -1){
+        if (inc != '\0') inData = caAppend(inData, inc);
+        else {
+            inData = caAppend(inData, '\0');
+            Serial.println(inData[2]);
+            if (inData[2] == '~') command = 0;
+            else if (inData[2] == '`') command = 1;
+            else command = -1;
+            if (inData[0] != 'k' || inData[1] != 's') command = -1;
+
+            if (command == 0){
+                int i = 3; //security check skipped
+                char* nfp = nullptr;
+                while (keepListening){
+                    if (inData[i] == '\0'){ //entire FP received
+                        int j = 0;
+                        while (nfp[j] != '\0'){
+                            Serial.print(nfp[j]);
+                            ++j;
+                        }
+                        keepListening = false;
+                    }
+                    else if (inData[i] == -1) continue;
+                    else nfp = caAppend(nfp, inData[i]);
+                }
             }
-            Wire.requestFrom(controlDevice, 1);
-            if (Wire.read() == '0'){
-                Serial.println(F("VALID FLIGHT PLAN"));
-                keepListening = false;
-                break;
+            else if (command == 1){
+                Serial.println("CALC");
+                int one = inData[3] - '0';
+                int two = inData[5] - '0';
+                int three = inData[7] - '0';
+                int answer;
+                if (inData[4] == '+') answer = one + two;
+                else if(inData[4] == '*') answer = one * two;
+                else if(inData[4] == '-') answer = one - two;
+                if (inData[6] == '+') answer += three;
+                else if (inData[6] == '*') answer *= three;
+                else if (inData[6] == '-') answer -= three;
+                Serial.print("ks");
+                Serial.print(answer);
+                delete[] inData;
+                inData = nullptr;
             }
-            else {
-                Serial.println(F("INVALID FLIGHT PLAN. TRY AGAIN"));
-                delete[] fp2;
-                fp2 = nullptr;
-                continue;
-            }
+            else {} //do nothing
         }
-        else if (inc == -1) continue;
-        else fp2 = caAppend(fp2, inc);
     }
 }
 
